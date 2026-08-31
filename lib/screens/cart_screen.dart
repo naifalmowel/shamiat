@@ -4,21 +4,29 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../providers/cart_provider.dart';
+import '../providers/language_provider.dart';
+import '../data/translations.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
-  Future<void> _launchWhatsApp(BuildContext context, CartProvider cart) async {
+  Future<void> _launchWhatsApp(BuildContext context, CartProvider cart, bool isAr) async {
     final phone = "971522242919"; 
-    String message = "السلام عليكم شاميات، أود طلب التالي:\n"
-                     "Hello Shamiat! I'd like to place an order:\n\n";
+    String message = isAr 
+        ? "السلام عليكم شاميات، أود طلب التالي:\n" 
+        : "Hello Shamiat! I'd like to place an order:\n\n";
     
     cart.items.forEach((key, cartItem) {
-      message += "• ${cartItem.item.nameAr} x${cartItem.quantity} - ${cartItem.item.price * cartItem.quantity} AED\n";
+      final name = isAr ? cartItem.item.nameAr : cartItem.item.nameEn;
+      message += "• $name x${cartItem.quantity} - ${cartItem.item.price * cartItem.quantity} AED\n";
     });
     
-    message += "\nالإجمالي: ${cart.totalAmount.toStringAsFixed(2)} AED";
-    message += "\nيرجى تأكيد الطلب. شكراً!";
+    message += isAr 
+        ? "\nالإجمالي: ${cart.totalAmount.toStringAsFixed(2)} AED"
+        : "\nTotal: ${cart.totalAmount.toStringAsFixed(2)} AED";
+    
+    message += "\n\n${Translations.getText('delivery_note', isAr)}";
+    message += isAr ? "\nيرجى تأكيد الطلب. شكراً!" : "\nPlease confirm my order. Thank you!";
     
     final url = "https://wa.me/$phone?text=${Uri.encodeComponent(message)}";
     
@@ -26,7 +34,7 @@ class CartScreen extends StatelessWidget {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('لا يمكن فتح واتساب حالياً')),
+        SnackBar(content: Text(isAr ? 'لا يمكن فتح واتساب حالياً' : 'Could not launch WhatsApp')),
       );
     }
   }
@@ -34,43 +42,51 @@ class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cart = context.watch<CartProvider>();
+    final isAr = context.watch<LanguageProvider>().isArabic;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        title: const Text('سلة الطلبات - CART'),
+        title: Text(Translations.getText('cart', isAr)),
         actions: [
           if (cart.items.isNotEmpty)
             TextButton(
               onPressed: () => cart.clearCart(),
-              child: const Text('مسح الكل', style: TextStyle(color: Colors.redAccent)),
+              child: Text(
+                Translations.getText('clear_all', isAr),
+                style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+              ),
             ),
         ],
       ),
       body: cart.items.isEmpty
           ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(30),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.05),
-                      shape: BoxShape.circle,
+              child: Padding(
+                padding: const EdgeInsets.all(30.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(40),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
+                        shape: BoxShape.circle,
+                      ),
+                      child: FaIcon(FontAwesomeIcons.cartShopping, size: 80, color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+                    ).animate().scale(duration: 600.ms),
+                    const SizedBox(height: 30),
+                    Text(
+                      Translations.getText('empty_cart', isAr),
+                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
-                    child: const FaIcon(FontAwesomeIcons.cartShopping, size: 80, color: Colors.white10),
-                  ).animate().scale(duration: 600.ms),
-                  const SizedBox(height: 30),
-                  const Text(
-                    'السلة فارغة حالياً',
-                    style: TextStyle(fontSize: 22, color: Colors.white54, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'ابدأ بإضافة وجباتك المفضلة',
-                    style: TextStyle(color: Colors.white30),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    Text(
+                      Translations.getText('start_ordering', isAr),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.grey, fontSize: 16),
+                    ),
+                  ],
+                ),
               ),
             )
           : Column(
@@ -83,133 +99,185 @@ class CartScreen extends StatelessWidget {
                       final cartItem = cart.items.values.toList()[index];
                       final item = cartItem.item;
                       return Container(
-                        margin: const EdgeInsets.only(bottom: 15),
-                        padding: const EdgeInsets.all(12),
+                        margin: const EdgeInsets.only(bottom: 18),
+                        padding: const EdgeInsets.all(15),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF1E1E1E),
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: Colors.white10),
+                          color: isDark ? const Color(0xFF1B2E26) : Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
+                              blurRadius: 10,
+                              offset: const Offset(0, 5),
+                            ),
+                          ],
+                          border: Border.all(color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
                         ),
                         child: Row(
                           children: [
                             ClipRRect(
-                              borderRadius: BorderRadius.circular(10),
+                              borderRadius: BorderRadius.circular(15),
                               child: Image.network(
                                 item.imageUrl,
-                                width: 70,
-                                height: 70,
+                                width: 85,
+                                height: 85,
                                 fit: BoxFit.cover,
-                                errorBuilder: (c, e, s) => Container(width: 70, height: 70, color: Colors.white10),
                               ),
                             ),
-                            const SizedBox(width: 15),
+                            const SizedBox(width: 18),
                             Expanded(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                 children: [
-                                  Text(item.nameAr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                                  Text('${item.price} AED', style: const TextStyle(color: Color(0xFFFFD700), fontWeight: FontWeight.w600)),
+                                  Text(
+                                    isAr ? item.nameAr : item.nameEn,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  Text(
+                                    '${item.price} AED',
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
+                            const SizedBox(width: 10),
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.black,
-                                borderRadius: BorderRadius.circular(12),
+                                color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey[100],
+                                borderRadius: BorderRadius.circular(15),
                               ),
-                              child: Row(
+                              child: Column(
                                 children: [
                                   IconButton(
-                                    icon: const FaIcon(FontAwesomeIcons.minus, size: 12, color: Colors.white54),
-                                    onPressed: () => cart.removeSingleItem(item.id),
+                                    icon: FaIcon(FontAwesomeIcons.plus, size: 14, color: Theme.of(context).colorScheme.primary),
+                                    onPressed: () => cart.addItem(item),
                                   ),
                                   Text(
                                     '${cartItem.quantity}',
                                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                                   ),
                                   IconButton(
-                                    icon: const FaIcon(FontAwesomeIcons.plus, size: 12, color: Color(0xFFFFD700)),
-                                    onPressed: () => cart.addItem(item),
+                                    icon: FaIcon(FontAwesomeIcons.minus, size: 14, color: Colors.grey),
+                                    onPressed: () => cart.removeSingleItem(item.id),
                                   ),
                                 ],
                               ),
                             ),
                           ],
                         ),
-                      ).animate().slideX(begin: 0.1, end: 0, duration: 300.ms);
+                      ).animate().slideX(begin: 0.1, end: 0, duration: 400.ms);
                     },
                   ),
                 ),
-                
-                // Summary & Checkout
-                Container(
-                  padding: const EdgeInsets.all(30),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF1A1A1A),
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-                    boxShadow: [
-                      BoxShadow(color: Colors.black54, blurRadius: 20, spreadRadius: 5),
-                    ],
-                  ),
-                  child: SafeArea(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('الإجمالي - Total', style: TextStyle(fontSize: 18, color: Colors.white70)),
-                            Text(
-                              '${cart.totalAmount.toStringAsFixed(2)} AED',
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFFFD700),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 25),
-                        GestureDetector(
-                          onTap: () => _launchWhatsApp(context, cart),
-                          child: Container(
-                            height: 60,
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF25D366), Color(0xFF128C7E)],
-                              ),
-                              borderRadius: BorderRadius.circular(15),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: const Color(0xFF25D366).withOpacity(0.3),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: const Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                FaIcon(FontAwesomeIcons.whatsapp, color: Colors.white, size: 28),
-                                SizedBox(width: 15),
-                                Text(
-                                  'تأكيد الطلب عبر واتساب',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                _buildSummary(context, cart, isAr),
+              ],
+            ),
+    );
+  }
+
+  Widget _buildSummary(BuildContext context, CartProvider cart, bool isAr) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    
+    return Container(
+      padding: const EdgeInsets.all(25),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1B2E26) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 25, spreadRadius: 5),
+        ],
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Professional Delivery Note
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
+              margin: const EdgeInsets.only(bottom: 25),
+              decoration: BoxDecoration(
+                color: primaryColor.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
+              ),
+              child: Row(
+                children: [
+                  FaIcon(FontAwesomeIcons.truckFast, size: 16, color: primaryColor),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      Translations.getText('delivery_note', isAr),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
+                  ),
+                ],
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  Translations.getText('total', isAr),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  '${cart.totalAmount.toStringAsFixed(2)} AED',
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 30),
+            GestureDetector(
+              onTap: () => _launchWhatsApp(context, cart, isAr),
+              child: Container(
+                height: 65,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF25D366), Color(0xFF128C7E)],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF25D366).withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.white, size: 30),
+                    const SizedBox(width: 18),
+                    Text(
+                      Translations.getText('order_whatsapp', isAr),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

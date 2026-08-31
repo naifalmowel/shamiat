@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
+import 'providers/language_provider.dart';
+import 'providers/theme_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/menu_screen.dart';
 import 'screens/cart_screen.dart';
 import 'widgets/responsive_layout.dart';
+import 'dart:ui';
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: const ShamiatApp(),
     ),
@@ -22,44 +27,84 @@ class ShamiatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final _ = context.watch<LanguageProvider>();
+
+    // Global Premium Palette: Deep Forest Green and Warm Copper
+    const primaryColor = Color(0xFF1B4332); // Deep Forest Green
+    const accentColor = Color(0xFFBC8A5F); // Warm Copper/Gold
+    const lightBg = Color(0xFFFAF9F6); // Soft Cream
+    const darkBg = Color(0xFF081C15); // Dark Emerald/Black
+
     return MaterialApp(
       title: 'Shamiat - شاميات',
       debugShowCheckedModeBanner: false,
+      themeMode: themeProvider.themeMode,
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.stylus, PointerDeviceKind.trackpad},
+      ),
       theme: ThemeData(
         useMaterial3: true,
-        fontFamily: 'Cairo', // Using the custom asset font
+        fontFamily: 'Cairo',
+        brightness: Brightness.light,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFFFFD700), // Gold
-          primary: const Color(0xFFFFD700),
-          secondary: const Color(0xFFC5A000),
-          surface: const Color(0xFF1A1A1A), // Dark surface for premium look
-          onSurface: Colors.white,
-          background: const Color(0xFF121212),
+          seedColor: primaryColor,
+          primary: primaryColor,
+          secondary: accentColor,
+          surface: Colors.white,
+          onSurface: const Color(0xFF2D2D2D),
         ),
-        scaffoldBackgroundColor: const Color(0xFF121212),
+        scaffoldBackgroundColor: lightBg,
         textTheme: const TextTheme(
-          displayLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          displayMedium: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          bodyLarge: TextStyle(color: Colors.white70),
-          bodyMedium: TextStyle(color: Colors.white70),
+          displayLarge: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+          displayMedium: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+          bodyLarge: TextStyle(color: Color(0xFF2D2D2D)),
+          bodyMedium: TextStyle(color: Color(0xFF2D2D2D)),
         ),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
-          backgroundColor: Color(0xFF1A1A1A),
+          backgroundColor: Colors.white,
           elevation: 0,
           titleTextStyle: TextStyle(
-            color: Color(0xFFFFD700),
+            color: primaryColor,
             fontSize: 22,
             fontWeight: FontWeight.bold,
             fontFamily: 'Cairo',
           ),
-          iconTheme: IconThemeData(color: Color(0xFFFFD700)),
+          iconTheme: IconThemeData(color: primaryColor),
         ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Color(0xFF1A1A1A),
-          selectedItemColor: Color(0xFFFFD700),
-          unselectedItemColor: Colors.white54,
-          type: BottomNavigationBarType.fixed,
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        fontFamily: 'Cairo',
+        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          brightness: Brightness.dark,
+          seedColor: accentColor,
+          primary: accentColor,
+          secondary: primaryColor,
+          surface: const Color(0xFF1B2E26),
+          onSurface: Colors.white,
+        ),
+        scaffoldBackgroundColor: darkBg,
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(color: accentColor, fontWeight: FontWeight.bold),
+          displayMedium: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white70),
+          titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          backgroundColor: Color(0xFF1B2E26),
+          elevation: 0,
+          titleTextStyle: TextStyle(
+            color: accentColor,
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            fontFamily: 'Cairo',
+          ),
+          iconTheme: IconThemeData(color: accentColor),
         ),
       ),
       home: const MainScreen(),
@@ -113,7 +158,9 @@ class PageTransitionSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 600),
+      switchInCurve: Curves.easeInOutCubic,
+      switchOutCurve: Curves.easeInOutCubic,
       transitionBuilder: (Widget child, Animation<double> animation) {
         return FadeTransition(
           opacity: animation,
