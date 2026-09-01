@@ -58,7 +58,7 @@ class ItemCard extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: primaryColor,
                       borderRadius: BorderRadius.circular(15),
-                      boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
                     ),
                     child: Text(
                       '${item.price.toStringAsFixed(0)} AED',
@@ -83,10 +83,11 @@ class ItemCard extends StatelessWidget {
                 children: [
                   Text(
                     isAr ? item.nameAr : item.nameEn,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 17,
                       height: 1.2,
+                      color: isDark ? Colors.white : const Color(0xFF1A1A1A),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -95,8 +96,8 @@ class ItemCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     isAr ? item.nameEn : item.nameAr,
-                    style: const TextStyle(
-                      color: Colors.grey,
+                    style: TextStyle(
+                      color: isDark ? Colors.white60 : Colors.grey[600],
                       fontSize: 12,
                       fontStyle: FontStyle.italic,
                     ),

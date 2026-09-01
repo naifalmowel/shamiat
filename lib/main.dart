@@ -28,7 +28,7 @@ class ShamiatApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    final _ = context.watch<LanguageProvider>();
+    final langProvider = context.watch<LanguageProvider>();
 
     // Global Premium Palette: Deep Forest Green and Warm Copper
     const primaryColor = Color(0xFF1B4332); // Deep Forest Green
@@ -40,6 +40,7 @@ class ShamiatApp extends StatelessWidget {
       title: 'Shamiat - شاميات',
       debugShowCheckedModeBanner: false,
       themeMode: themeProvider.themeMode,
+      locale: Locale(langProvider.isArabic ? 'ar' : 'en'),
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.stylus, PointerDeviceKind.trackpad},
       ),
@@ -52,14 +53,15 @@ class ShamiatApp extends StatelessWidget {
           primary: primaryColor,
           secondary: accentColor,
           surface: Colors.white,
-          onSurface: const Color(0xFF2D2D2D),
+          onSurface: const Color(0xFF1A1A1A),
         ),
         scaffoldBackgroundColor: lightBg,
         textTheme: const TextTheme(
           displayLarge: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
           displayMedium: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
-          bodyLarge: TextStyle(color: Color(0xFF2D2D2D)),
-          bodyMedium: TextStyle(color: Color(0xFF2D2D2D)),
+          titleLarge: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+          bodyLarge: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
+          bodyMedium: TextStyle(color: Color(0xFF4A4A4A), fontSize: 14),
         ),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
@@ -90,9 +92,9 @@ class ShamiatApp extends StatelessWidget {
         textTheme: const TextTheme(
           displayLarge: TextStyle(color: accentColor, fontWeight: FontWeight.bold),
           displayMedium: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          bodyLarge: TextStyle(color: Colors.white),
-          bodyMedium: TextStyle(color: Colors.white70),
           titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          bodyLarge: TextStyle(color: Colors.white, fontSize: 16),
+          bodyMedium: TextStyle(color: Colors.white70, fontSize: 14),
         ),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
