@@ -45,138 +45,145 @@ class CartScreen extends StatelessWidget {
     final isAr = context.watch<LanguageProvider>().isArabic;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(Translations.getText('cart', isAr)),
-        actions: [
-          if (cart.items.isNotEmpty)
-            TextButton(
-              onPressed: () => cart.clearCart(),
-              child: Text(
-                Translations.getText('clear_all', isAr),
-                style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+    if (cart.items.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(40),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
+                  shape: BoxShape.circle,
+                ),
+                child: FaIcon(FontAwesomeIcons.cartShopping, size: 80, color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+              ).animate().scale(duration: 600.ms),
+              const SizedBox(height: 30),
+              Text(
+                Translations.getText('empty_cart', isAr),
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-            ),
-        ],
-      ),
-      body: cart.items.isEmpty
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.all(30.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(40),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
-                        shape: BoxShape.circle,
-                      ),
-                      child: FaIcon(FontAwesomeIcons.cartShopping, size: 80, color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-                    ).animate().scale(duration: 600.ms),
-                    const SizedBox(height: 30),
-                    Text(
-                      Translations.getText('empty_cart', isAr),
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              const SizedBox(height: 12),
+              Text(
+                Translations.getText('start_ordering', isAr),
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                Translations.getText('cart', isAr),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+              TextButton.icon(
+                onPressed: () => cart.clearCart(),
+                icon: const FaIcon(FontAwesomeIcons.trash, size: 12, color: Colors.redAccent),
+                label: Text(
+                  Translations.getText('clear_all', isAr),
+                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.all(20),
+            itemCount: cart.items.length,
+            itemBuilder: (context, index) {
+              final cartItem = cart.items.values.toList()[index];
+              final item = cartItem.item;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 18),
+                padding: const EdgeInsets.all(15),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1B2E26) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
                     ),
-                    const SizedBox(height: 12),
-                    Text(
-                      Translations.getText('start_ordering', isAr),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.grey, fontSize: 16),
+                  ],
+                  border: Border.all(color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+                ),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: Image.network(
+                        item.imageUrl,
+                        width: 85,
+                        height: 85,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(width: 18),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            isAr ? item.nameAr : item.nameEn,
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            '${item.price} AED',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey[100],
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      child: Column(
+                        children: [
+                          IconButton(
+                            icon: FaIcon(FontAwesomeIcons.plus, size: 14, color: Theme.of(context).colorScheme.primary),
+                            onPressed: () => cart.addItem(item),
+                          ),
+                          Text(
+                            '${cartItem.quantity}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          ),
+                          IconButton(
+                            icon: FaIcon(FontAwesomeIcons.minus, size: 14, color: Colors.grey),
+                            onPressed: () => cart.removeSingleItem(item.id),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
-            )
-          : Column(
-              children: [
-                Expanded(
-                  child: ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: cart.items.length,
-                    itemBuilder: (context, index) {
-                      final cartItem = cart.items.values.toList()[index];
-                      final item = cartItem.item;
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 18),
-                        padding: const EdgeInsets.all(15),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1B2E26) : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
-                              blurRadius: 10,
-                              offset: const Offset(0, 5),
-                            ),
-                          ],
-                          border: Border.all(color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
-                        ),
-                        child: Row(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(15),
-                              child: Image.network(
-                                item.imageUrl,
-                                width: 85,
-                                height: 85,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            const SizedBox(width: 18),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    isAr ? item.nameAr : item.nameEn,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    '${item.price} AED',
-                                    style: TextStyle(
-                                      color: Theme.of(context).colorScheme.primary,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey[100],
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: Column(
-                                children: [
-                                  IconButton(
-                                    icon: FaIcon(FontAwesomeIcons.plus, size: 14, color: Theme.of(context).colorScheme.primary),
-                                    onPressed: () => cart.addItem(item),
-                                  ),
-                                  Text(
-                                    '${cartItem.quantity}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                                  ),
-                                  IconButton(
-                                    icon: FaIcon(FontAwesomeIcons.minus, size: 14, color: Colors.grey),
-                                    onPressed: () => cart.removeSingleItem(item.id),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ).animate().slideX(begin: 0.1, end: 0, duration: 400.ms);
-                    },
-                  ),
-                ),
-                _buildSummary(context, cart, isAr),
-              ],
-            ),
+              ).animate().slideX(begin: 0.1, end: 0, duration: 400.ms);
+            },
+          ),
+        ),
+        _buildSummary(context, cart, isAr),
+      ],
     );
   }
 
@@ -197,7 +204,6 @@ class CartScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Professional Delivery Note
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
               margin: const EdgeInsets.only(bottom: 25),

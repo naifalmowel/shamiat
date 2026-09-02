@@ -17,15 +17,19 @@ class ItemCard extends StatelessWidget {
     final isAr = context.watch<LanguageProvider>().isArabic;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
+    
+    // Watch cart to get current quantity
+    final cart = context.watch<CartProvider>();
+    final quantity = cart.getQuantity(item.id);
 
     return Container(
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1B2E26) : Colors.white,
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+        border: Border.all(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
+            color: Colors.black.withOpacity(isDark ? 0.3 : 0.03),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -105,39 +109,13 @@ class ItemCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const Spacer(),
-                  // Add Button
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () {
-                        context.read<CartProvider>().addItem(item);
-                        _showAddedFeedback(context, item, isAr);
-                      },
-                      borderRadius: BorderRadius.circular(15),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        decoration: BoxDecoration(
-                          color: primaryColor.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(color: primaryColor.withValues(alpha: 0.3)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            FaIcon(FontAwesomeIcons.plus, size: 14, color: primaryColor),
-                            const SizedBox(width: 10),
-                            Text(
-                              Translations.getText('add_to_cart', isAr),
-                              style: TextStyle(
-                                color: primaryColor,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+                  
+                  // Interactive Cart Button / Quantity Selector
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: quantity > 0 
+                      ? _buildQuantitySelector(context, primaryColor, isDark, quantity)
+                      : _buildAddButton(context, primaryColor, isAr),
                   ),
                 ],
               ),
@@ -148,31 +126,71 @@ class ItemCard extends StatelessWidget {
     ).animate().fadeIn(duration: 400.ms).slideY(begin: 0.1, end: 0);
   }
 
-  void _showAddedFeedback(BuildContext context, MenuItem item, bool isAr) {
-    ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        behavior: SnackBarBehavior.floating,
-        margin: const EdgeInsets.all(20),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        content: Row(
-          children: [
-            FaIcon(FontAwesomeIcons.circleCheck, color: Theme.of(context).colorScheme.primary, size: 20),
-            const SizedBox(width: 15),
-            Expanded(
-              child: Text(
-                '${Translations.getText('added_to_cart', isAr)}: ${isAr ? item.nameAr : item.nameEn}',
+  Widget _buildAddButton(BuildContext context, Color primaryColor, bool isAr) {
+    return Material(
+      key: const ValueKey('add_btn'),
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          context.read<CartProvider>().addItem(item);
+        },
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: primaryColor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(15),
+            border: Border.all(color: primaryColor.withOpacity(0.3)),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FaIcon(FontAwesomeIcons.plus, size: 14, color: primaryColor),
+              const SizedBox(width: 10),
+              Text(
+                Translations.getText('add_to_cart', isAr),
                 style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color,
-                  fontFamily: 'Cairo',
+                  color: primaryColor,
                   fontWeight: FontWeight.bold,
+                  fontSize: 13,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  Widget _buildQuantitySelector(BuildContext context, Color primaryColor, bool isDark, int quantity) {
+    return Container(
+      key: const ValueKey('qty_selector'),
+      padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+      decoration: BoxDecoration(
+        color: primaryColor,
+        borderRadius: BorderRadius.circular(15),
+        boxShadow: [BoxShadow(color: primaryColor.withOpacity(0.3), blurRadius: 8)],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            padding: EdgeInsets.zero,
+            icon: const FaIcon(FontAwesomeIcons.minus, size: 12, color: Colors.white),
+            onPressed: () => context.read<CartProvider>().removeSingleItem(item.id),
+          ),
+          Text(
+            '$quantity',
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          IconButton(
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            padding: EdgeInsets.zero,
+            icon: const FaIcon(FontAwesomeIcons.plus, size: 12, color: Colors.white),
+            onPressed: () => context.read<CartProvider>().addItem(item),
+          ),
+        ],
       ),
     );
   }

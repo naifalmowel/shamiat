@@ -62,6 +62,10 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  int getQuantity(String id) {
+    return _items[id]?.quantity ?? 0;
+  }
+
   void clearCart() {
     _items.clear();
     notifyListeners();

@@ -54,6 +54,7 @@ class ShamiatApp extends StatelessWidget {
           secondary: accentColor,
           surface: Colors.white,
           onSurface: const Color(0xFF1A1A1A),
+          background: lightBg,
         ),
         scaffoldBackgroundColor: lightBg,
         textTheme: const TextTheme(
@@ -75,6 +76,11 @@ class ShamiatApp extends StatelessWidget {
           ),
           iconTheme: IconThemeData(color: primaryColor),
         ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Colors.white,
+          selectedItemColor: primaryColor,
+          unselectedItemColor: Colors.grey,
+        ),
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
@@ -87,6 +93,7 @@ class ShamiatApp extends StatelessWidget {
           secondary: primaryColor,
           surface: const Color(0xFF1B2E26),
           onSurface: Colors.white,
+          background: darkBg,
         ),
         scaffoldBackgroundColor: darkBg,
         textTheme: const TextTheme(
@@ -96,6 +103,7 @@ class ShamiatApp extends StatelessWidget {
           bodyLarge: TextStyle(color: Colors.white, fontSize: 16),
           bodyMedium: TextStyle(color: Colors.white70, fontSize: 14),
         ),
+        iconTheme: const IconThemeData(color: Colors.white),
         appBarTheme: const AppBarTheme(
           centerTitle: true,
           backgroundColor: Color(0xFF1B2E26),
@@ -106,7 +114,12 @@ class ShamiatApp extends StatelessWidget {
             fontWeight: FontWeight.bold,
             fontFamily: 'Cairo',
           ),
-          iconTheme: IconThemeData(color: accentColor),
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+          backgroundColor: Color(0xFF1B2E26),
+          selectedItemColor: accentColor,
+          unselectedItemColor: Colors.white70,
         ),
       ),
       home: const MainScreen(),

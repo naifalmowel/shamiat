@@ -21,7 +21,7 @@ class HomeScreen extends StatelessWidget {
 
     final List<String> offerImages = [
       'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200', // Meat
-      'https://images.unsplash.com/photo-1562967962-22e0735dd105?q=80&w=1200', // Shawarma
+      'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?q=80&w=1200', // Shawarma
       'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=1200', // Crispy
     ];
 
@@ -29,7 +29,7 @@ class HomeScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Refined Hero Section (Modern & Clean)
+            // Hero Section (Removed Transparent Texture & Fixed Colors)
             Container(
               height: 450,
               width: double.infinity,
@@ -37,82 +37,66 @@ class HomeScreen extends StatelessWidget {
                 color: isDark ? const Color(0xFF081C15) : primaryColor,
                 borderRadius: const BorderRadius.vertical(bottom: Radius.circular(40)),
               ),
-              child: Stack(
-                children: [
-                  // Subtle Pattern Overlay (Optional)
-                  Positioned.fill(
-                    child: Opacity(
-                      opacity: 0.05,
-                      child: Image.network(
-                        'https://www.transparenttextures.com/patterns/carbon-fibre.png',
-                        repeat: ImageRepeat.repeat,
-                      ),
+              child: SafeArea(
+                child: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 150,
+                          width: 150,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(color: accentColor, width: 3),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black26, blurRadius: 20, spreadRadius: 5),
+                            ],
+                            image: const DecorationImage(
+                              image: AssetImage('assets/images/bg.png'),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ).animate().fadeIn(duration: 800.ms).scale(),
+                        
+                        const SizedBox(height: 25),
+                        
+                        Text(
+                          'SHAMIAT',
+                          style: TextStyle(
+                            color: accentColor,
+                            letterSpacing: 8,
+                            fontSize: 42,
+                            fontWeight: FontWeight.bold,
+                            shadows: const [Shadow(color: Colors.black38, blurRadius: 10, offset: Offset(0, 5))],
+                          ),
+                        ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
+                        
+                        Text(
+                          'شــــاميات',
+                          style: TextStyle(
+                            color: isDark ? Colors.white : Colors.white, // Keep white for brand visibility
+                            fontSize: 34,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2, end: 0),
+                        
+                        const SizedBox(height: 10),
+                        
+                        Text(
+                          Translations.getText('authentic_taste', isAr),
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 16,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ).animate().fadeIn(delay: 700.ms),
+                      ],
                     ),
                   ),
-                  // Content
-                  SafeArea(
-                    child: Center(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // Brand Image (using bg.png as a logo/feature instead of background)
-                            Container(
-                              height: 150,
-                              width: 150,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(color: accentColor, width: 3),
-                                boxShadow: [
-                                  BoxShadow(color: Colors.black26, blurRadius: 20, spreadRadius: 5),
-                                ],
-                                image: const DecorationImage(
-                                  image: AssetImage('assets/images/bg.png'),
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ).animate().fadeIn(duration: 800.ms).scale(),
-                            
-                            const SizedBox(height: 25),
-                            
-                            Text(
-                              'SHAMIAT',
-                              style: TextStyle(
-                                color: accentColor,
-                                letterSpacing: 8,
-                                fontSize: 42,
-                                fontWeight: FontWeight.bold,
-                                shadows: [Shadow(color: Colors.black38, blurRadius: 10, offset: Offset(0, 5))],
-                              ),
-                            ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2, end: 0),
-                            
-                            Text(
-                              'شــــاميات',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 34,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.2, end: 0),
-                            
-                            const SizedBox(height: 10),
-                            
-                            Text(
-                              Translations.getText('authentic_taste', isAr),
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 16,
-                                fontStyle: FontStyle.italic,
-                              ),
-                            ).animate().fadeIn(delay: 700.ms),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
 
@@ -160,7 +144,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.2),
+                              color: Colors.black.withOpacity(0.2),
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             ),
@@ -173,7 +157,7 @@ class HomeScreen extends StatelessWidget {
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                               colors: [
-                                Colors.black.withValues(alpha: 0.8),
+                                Colors.black.withOpacity(0.8),
                                 Colors.transparent,
                               ],
                             ),
@@ -194,9 +178,9 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 5),
-                              Text(
-                                isAr ? 'استمتع بأفضل العروض اليوم' : 'Best Offers Today',
-                                style: const TextStyle(
+                              const Text(
+                                'Best Offers Today',
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
@@ -212,7 +196,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            // Main Action Button
+            // Action Button
             Padding(
               padding: const EdgeInsets.fromLTRB(25, 0, 25, 60),
               child: GestureDetector(
@@ -227,7 +211,7 @@ class HomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withValues(alpha: 0.4),
+                        color: primaryColor.withOpacity(0.4),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),
