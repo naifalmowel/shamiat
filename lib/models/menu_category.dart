@@ -1,7 +1,7 @@
 import 'menu_item.dart';
 
 class MenuCategory {
-  final Category category;
+  final String category; // Changed from Category enum to String
   final String nameAr;
   final String nameEn;
   final List<MenuItem> items;

@@ -1,13 +1,3 @@
-enum Category {
-  shawarma,
-  burger,
-  sandwich,
-  meals,
-  chicken,
-  appetizers,
-  drinks,
-}
-
 class MenuItem {
   final String id;
   final String nameAr;
@@ -17,7 +7,7 @@ class MenuItem {
   final double price;
   final double? discountPrice;
   final String imageUrl;
-  final Category category;
+  final String category;
   final bool isAvailable;
   final List<String>? options;
 
@@ -36,14 +26,6 @@ class MenuItem {
   });
 
   factory MenuItem.fromMap(Map<String, dynamic> map, String docId) {
-    Category cat = Category.shawarma;
-    for (var val in Category.values) {
-      if (val.name == map['category']) {
-        cat = val;
-        break;
-      }
-    }
-
     return MenuItem(
       id: docId,
       nameAr: map['nameAr'] ?? '',
@@ -53,9 +35,11 @@ class MenuItem {
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
       discountPrice: (map['discountPrice'] as num?)?.toDouble(),
       imageUrl: map['imageUrl'] ?? '',
-      category: cat,
+      category: map['category'] ?? 'others',
       isAvailable: map['isAvailable'] ?? true,
-      options: map['options'] != null ? List<String>.from(map['options']) : null,
+      options: map['options'] != null
+          ? List<String>.from(map['options'])
+          : null,
     );
   }
 
@@ -68,7 +52,7 @@ class MenuItem {
       'price': price,
       'discountPrice': discountPrice,
       'imageUrl': imageUrl,
-      'category': category.name,
+      'category': category,
       'isAvailable': isAvailable,
       'options': options,
     };

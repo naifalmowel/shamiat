@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 import 'dart:ui';
-import '../data/menu_data.dart';
-import '../models/menu_item.dart';
 import '../widgets/item_card.dart';
 import '../providers/language_provider.dart';
 import '../providers/menu_provider.dart';
@@ -16,7 +14,7 @@ class MenuScreen extends StatefulWidget {
 }
 
 class _MenuScreenState extends State<MenuScreen> {
-  Category? selectedCategory = Category.shawarma;
+  String? selectedCategoryId;
   final ScrollController _categoryScrollController = ScrollController();
 
   @override
@@ -26,10 +24,19 @@ class _MenuScreenState extends State<MenuScreen> {
     final primaryColor = Theme.of(context).colorScheme.primary;
     final menuProvider = context.watch<MenuProvider>();
 
-    // Filter items from MenuProvider dynamically
-    final filteredItems = selectedCategory == null
+    final dynamicCategories = menuProvider.categories;
+
+    // Auto-select first category if none selected
+    if (selectedCategoryId == null && dynamicCategories.isNotEmpty) {
+      selectedCategoryId = dynamicCategories.first.id;
+    }
+
+    // Filter items from MenuProvider dynamically by String category ID
+    final filteredItems = selectedCategoryId == null
         ? menuProvider.menuItems
-        : menuProvider.menuItems.where((item) => item.category == selectedCategory).toList();
+        : menuProvider.menuItems
+              .where((item) => item.category == selectedCategoryId)
+              .toList();
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 800;
@@ -37,7 +44,7 @@ class _MenuScreenState extends State<MenuScreen> {
 
     return Column(
       children: [
-        // Category Selector
+        // Category Selector (Dynamic from Firebase)
         Container(
           height: 110,
           padding: const EdgeInsets.only(top: 10, bottom: 5),
@@ -46,30 +53,52 @@ class _MenuScreenState extends State<MenuScreen> {
               Expanded(
                 child: ScrollConfiguration(
                   behavior: ScrollConfiguration.of(context).copyWith(
-                    dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
+                    dragDevices: {
+                      PointerDeviceKind.touch,
+                      PointerDeviceKind.mouse,
+                    },
                   ),
                   child: ListView.builder(
                     controller: _categoryScrollController,
                     scrollDirection: Axis.horizontal,
-                    itemCount: menuCategories.length,
+                    itemCount: dynamicCategories.length,
                     padding: const EdgeInsets.symmetric(horizontal: 15),
                     itemBuilder: (context, index) {
-                      final cat = menuCategories[index];
-                      final isSelected = selectedCategory == cat.category;
+                      final cat = dynamicCategories[index];
+                      final isSelected = selectedCategoryId == cat.id;
                       return GestureDetector(
-                        onTap: () => setState(() => selectedCategory = cat.category),
+                        onTap: () =>
+                            setState(() => selectedCategoryId = cat.id),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           margin: const EdgeInsets.only(right: 12, bottom: 5),
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 6,
+                          ),
                           decoration: BoxDecoration(
-                            color: isSelected ? primaryColor : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
+                            color: isSelected
+                                ? primaryColor
+                                : (isDark
+                                      ? Colors.white.withValues(alpha: 0.05)
+                                      : Colors.white),
                             borderRadius: BorderRadius.circular(15),
-                            boxShadow: isSelected 
-                              ? [BoxShadow(color: primaryColor.withValues(alpha: 0.2), blurRadius: 6)]
-                              : [],
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: primaryColor.withValues(
+                                        alpha: 0.2,
+                                      ),
+                                      blurRadius: 6,
+                                    ),
+                                  ]
+                                : [],
                             border: Border.all(
-                              color: isSelected ? primaryColor : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+                              color: isSelected
+                                  ? primaryColor
+                                  : (isDark
+                                        ? Colors.white10
+                                        : Colors.black.withValues(alpha: 0.05)),
                             ),
                           ),
                           child: Center(
@@ -79,7 +108,11 @@ class _MenuScreenState extends State<MenuScreen> {
                                 Text(
                                   isAr ? cat.nameAr : cat.nameEn,
                                   style: TextStyle(
-                                    color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : Theme.of(
+                                            context,
+                                          ).textTheme.bodyLarge?.color,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 13,
                                   ),
@@ -87,7 +120,9 @@ class _MenuScreenState extends State<MenuScreen> {
                                 Text(
                                   isAr ? cat.nameEn : cat.nameAr,
                                   style: TextStyle(
-                                    color: isSelected ? Colors.white70 : Colors.grey,
+                                    color: isSelected
+                                        ? Colors.white70
+                                        : Colors.grey,
                                     fontSize: 9,
                                     fontWeight: FontWeight.w300,
                                   ),
@@ -109,28 +144,47 @@ class _MenuScreenState extends State<MenuScreen> {
                   color: Colors.grey.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Center(
-                  child: Container(
-                    width: 15,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      color: primaryColor.withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ).animate(onPlay: (c) => c.repeat(reverse: true)).moveX(begin: -10, end: 10, duration: 1.5.seconds),
+                child:
+                    Center(
+                          child: Container(
+                            width: 15,
+                            height: 3,
+                            decoration: BoxDecoration(
+                              color: primaryColor.withValues(alpha: 0.4),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        )
+                        .animate(onPlay: (c) => c.repeat(reverse: true))
+                        .moveX(begin: -10, end: 10, duration: 1.5.seconds),
               ),
             ],
           ),
         ),
-        
-        // Grid with adjusted aspect ratio
+
+        // Grid with dynamic items
         Expanded(
           child: filteredItems.isEmpty
               ? Center(
-                  child: Text(
-                    isAr ? 'لا توجد منتجات متوفرة حالياً' : 'No items available right now',
-                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.no_meals_outlined,
+                        size: 60,
+                        color: Colors.grey.shade300,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        isAr
+                            ? 'لا توجد منتجات في هذه الفئة حالياً'
+                            : 'No items in this category yet',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
                 )
               : GridView.builder(

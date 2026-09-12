@@ -3,7 +3,7 @@ import '../models/menu_category.dart';
 
 final List<MenuCategory> menuCategories = [
   MenuCategory(
-    category: Category.shawarma,
+    category: 'shawarma',
     nameAr: 'شاورما (دجاج ولحم)',
     nameEn: 'Shawarma (Chicken & Meat)',
     items: [
@@ -15,7 +15,7 @@ final List<MenuCategory> menuCategories = [
         descriptionEn: 'Saj bread, garlic, pickles, fries',
         price: 9.0,
         imageUrl: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?q=80&w=800',
-        category: Category.shawarma,
+        category: 'shawarma',
       ),
       MenuItem(
         id: 'sh2',
@@ -25,7 +25,7 @@ final List<MenuCategory> menuCategories = [
         descriptionEn: 'Saj bread, tahini, parsley, onions',
         price: 11.0,
         imageUrl: 'https://images.unsplash.com/photo-1633321702518-7feccaf0e8d5?q=80&w=800',
-        category: Category.shawarma,
+        category: 'shawarma',
       ),
       MenuItem(
         id: 'sh3',
@@ -35,7 +35,7 @@ final List<MenuCategory> menuCategories = [
         descriptionEn: 'Shawarma pieces, fries, garlic, pickles',
         price: 24.0,
         imageUrl: 'https://images.unsplash.com/photo-1599307734115-ff5d59a7f01a?q=80&w=800',
-        category: Category.shawarma,
+        category: 'shawarma',
       ),
       MenuItem(
         id: 'sh4',
@@ -45,12 +45,12 @@ final List<MenuCategory> menuCategories = [
         descriptionEn: 'Meat shawarma pieces, fries, tahini, pickles',
         price: 28.0,
         imageUrl: 'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?q=80&w=800',
-        category: Category.shawarma,
+        category: 'shawarma',
       ),
     ],
   ),
   MenuCategory(
-    category: Category.burger,
+    category: 'burger',
     nameAr: 'برجر وساندوتشات',
     nameEn: 'Burger & Sandwiches',
     items: [
@@ -60,7 +60,7 @@ final List<MenuCategory> menuCategories = [
         nameEn: 'Classic Beef Burger',
         price: 22.0,
         imageUrl: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=800',
-        category: Category.burger,
+        category: 'burger',
       ),
       MenuItem(
         id: 's1',
@@ -68,12 +68,12 @@ final List<MenuCategory> menuCategories = [
         nameEn: 'Crispy Sandwich',
         price: 18.0,
         imageUrl: 'https://images.unsplash.com/photo-1553909489-cd47e0907980?q=80&w=800',
-        category: Category.sandwich,
+        category: 'sandwich',
       ),
     ],
   ),
   MenuCategory(
-    category: Category.meals,
+    category: 'meals',
     nameAr: 'وجبات',
     nameEn: 'Meals',
     items: [
@@ -83,12 +83,12 @@ final List<MenuCategory> menuCategories = [
         nameEn: 'Chicken Fillet Meal',
         price: 32.0,
         imageUrl: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=800',
-        category: Category.meals,
+        category: 'meals',
       ),
     ],
   ),
   MenuCategory(
-    category: Category.chicken,
+    category: 'chicken',
     nameAr: 'دجاج (بروستد وشواية)',
     nameEn: 'Chicken (Broasted & Machine)',
     items: [
@@ -98,7 +98,7 @@ final List<MenuCategory> menuCategories = [
         nameEn: 'Broasted 4 Pcs',
         price: 28.0,
         imageUrl: 'https://images.unsplash.com/photo-1562967914-6cbb77a8335f?q=80&w=800',
-        category: Category.chicken,
+        category: 'chicken',
       ),
       MenuItem(
         id: 'c3',
@@ -106,12 +106,12 @@ final List<MenuCategory> menuCategories = [
         nameEn: 'Whole Machine Chicken',
         price: 36.0,
         imageUrl: 'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?q=80&w=800',
-        category: Category.chicken,
+        category: 'chicken',
       ),
     ],
   ),
   MenuCategory(
-    category: Category.appetizers,
+    category: 'appetizers',
     nameAr: 'مقبلات وجوانب',
     nameEn: 'Appetizers & Sides',
     items: [
@@ -121,7 +121,7 @@ final List<MenuCategory> menuCategories = [
         nameEn: 'French Fries',
         price: 7.0,
         imageUrl: 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=800',
-        category: Category.appetizers,
+        category: 'appetizers',
       ),
       MenuItem(
         id: 'a3',
@@ -129,12 +129,12 @@ final List<MenuCategory> menuCategories = [
         nameEn: 'Hummus',
         price: 12.0,
         imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800',
-        category: Category.appetizers,
+        category: 'appetizers',
       ),
     ],
   ),
   MenuCategory(
-    category: Category.drinks,
+    category: 'drinks',
     nameAr: 'عصائر وموهيتو',
     nameEn: 'Juices & Mojitos',
     items: [
@@ -144,7 +144,7 @@ final List<MenuCategory> menuCategories = [
         nameEn: 'Fresh Orange Juice',
         price: 12.0,
         imageUrl: 'https://images.unsplash.com/photo-1536599018102-9f803c140fc1?q=80&w=800',
-        category: Category.drinks,
+        category: 'drinks',
       ),
       MenuItem(
         id: 'd4',
@@ -152,7 +152,7 @@ final List<MenuCategory> menuCategories = [
         nameEn: 'Blue Mojito',
         price: 16.0,
         imageUrl: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=800',
-        category: Category.drinks,
+        category: 'drinks',
       ),
     ],
   ),
