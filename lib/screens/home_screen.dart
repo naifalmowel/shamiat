@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import '../providers/language_provider.dart';
+import '../providers/menu_provider.dart';
 import '../data/translations.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -14,22 +15,19 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final langProvider = context.watch<LanguageProvider>();
+    final menuProvider = context.watch<MenuProvider>();
     final isAr = langProvider.isArabic;
     final primaryColor = Theme.of(context).colorScheme.primary;
     final accentColor = Theme.of(context).colorScheme.secondary;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    final List<String> offerImages = [
-      'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200', // Meat
-      'https://images.unsplash.com/photo-1529006557810-274b9b2fc783?q=80&w=1200', // Shawarma
-      'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?q=80&w=1200', // Crispy
-    ];
+    final carouselItems = menuProvider.carouselItems;
 
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Hero Section (Removed Transparent Texture & Fixed Colors)
+            // Hero Section
             Container(
               height: 450,
               width: double.infinity,
@@ -76,7 +74,7 @@ class HomeScreen extends StatelessWidget {
                         Text(
                           'شــــاميات',
                           style: TextStyle(
-                            color: isDark ? Colors.white : Colors.white, // Keep white for brand visibility
+                            color: Colors.white,
                             fontSize: 34,
                             fontWeight: FontWeight.bold,
                           ),
@@ -133,18 +131,21 @@ class HomeScreen extends StatelessWidget {
                       autoPlayAnimationDuration: const Duration(milliseconds: 1000),
                       viewportFraction: 0.88,
                     ),
-                    items: offerImages.map((imageUrl) {
+                    items: carouselItems.map((item) {
                       return Container(
                         margin: const EdgeInsets.symmetric(horizontal: 5.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(25),
-                          image: DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
-                          ),
+                          image: item.imageUrl.isNotEmpty
+                              ? DecorationImage(
+                                  image: NetworkImage(item.imageUrl),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                          color: primaryColor.withValues(alpha: 0.2),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
+                              color: Colors.black.withValues(alpha: 0.2),
                               blurRadius: 15,
                               offset: const Offset(0, 8),
                             ),
@@ -157,7 +158,7 @@ class HomeScreen extends StatelessWidget {
                               begin: Alignment.bottomCenter,
                               end: Alignment.topCenter,
                               colors: [
-                                Colors.black.withOpacity(0.8),
+                                Colors.black.withValues(alpha: 0.8),
                                 Colors.transparent,
                               ],
                             ),
@@ -169,7 +170,7 @@ class HomeScreen extends StatelessWidget {
                             crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                             children: [
                               Text(
-                                isAr ? 'خصم خاص' : 'SPECIAL DISCOUNT',
+                                isAr ? item.titleAr : item.titleEn,
                                 style: TextStyle(
                                   color: accentColor,
                                   fontSize: 14,
@@ -178,11 +179,11 @@ class HomeScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 5),
-                              const Text(
-                                'Best Offers Today',
-                                style: TextStyle(
+                              Text(
+                                isAr ? item.subTitleAr : item.subTitleEn,
+                                style: const TextStyle(
                                   color: Colors.white,
-                                  fontSize: 20,
+                                  fontSize: 18,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -211,7 +212,7 @@ class HomeScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(25),
                     boxShadow: [
                       BoxShadow(
-                        color: primaryColor.withOpacity(0.4),
+                        color: primaryColor.withValues(alpha: 0.4),
                         blurRadius: 20,
                         offset: const Offset(0, 8),
                       ),

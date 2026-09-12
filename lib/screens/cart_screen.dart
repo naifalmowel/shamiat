@@ -33,9 +33,11 @@ class CartScreen extends StatelessWidget {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
+    if(context.mounted){
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(isAr ? 'لا يمكن فتح واتساب حالياً' : 'Could not launch WhatsApp')),
       );
+    }
     }
   }
 
@@ -44,6 +46,7 @@ class CartScreen extends StatelessWidget {
     final cart = context.watch<CartProvider>();
     final isAr = context.watch<LanguageProvider>().isArabic;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final screenWidth = MediaQuery.of(context).size.width;
 
     if (cart.items.isEmpty) {
       return Center(
@@ -53,23 +56,23 @@ class CartScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(40),
+                padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
                   color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.02),
                   shape: BoxShape.circle,
                 ),
-                child: FaIcon(FontAwesomeIcons.cartShopping, size: 80, color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+                child: FaIcon(FontAwesomeIcons.cartShopping, size: 60, color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
               ).animate().scale(duration: 600.ms),
-              const SizedBox(height: 30),
+              const SizedBox(height: 25),
               Text(
                 Translations.getText('empty_cart', isAr),
-                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               Text(
                 Translations.getText('start_ordering', isAr),
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.grey, fontSize: 16),
+                style: const TextStyle(color: Colors.grey, fontSize: 14),
               ),
             ],
           ),
@@ -80,20 +83,20 @@ class CartScreen extends StatelessWidget {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
                 Translations.getText('cart', isAr),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               TextButton.icon(
                 onPressed: () => cart.clearCart(),
-                icon: const FaIcon(FontAwesomeIcons.trash, size: 12, color: Colors.redAccent),
+                icon: const FaIcon(FontAwesomeIcons.trash, size: 10, color: Colors.redAccent),
                 label: Text(
                   Translations.getText('clear_all', isAr),
-                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 12),
                 ),
               ),
             ],
@@ -101,53 +104,55 @@ class CartScreen extends StatelessWidget {
         ),
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(15),
             itemCount: cart.items.length,
             itemBuilder: (context, index) {
               final cartItem = cart.items.values.toList()[index];
               final item = cartItem.item;
               return Container(
-                margin: const EdgeInsets.only(bottom: 18),
-                padding: const EdgeInsets.all(15),
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: isDark ? const Color(0xFF1B2E26) : Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(15),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.03),
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 5,
+                      offset: const Offset(0, 2),
                     ),
                   ],
-                  border: Border.all(color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
+                  border: Border.all(color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.03)),
                 ),
                 child: Row(
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(10),
                       child: Image.network(
                         item.imageUrl,
-                        width: 85,
-                        height: 85,
+                        width: 65,
+                        height: 65,
                         fit: BoxFit.cover,
                       ),
                     ),
-                    const SizedBox(width: 18),
+                    const SizedBox(width: 15),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                         children: [
                           Text(
                             isAr ? item.nameAr : item.nameEn,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          const SizedBox(height: 5),
+                          const SizedBox(height: 4),
                           Text(
                             '${item.price} AED',
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16,
+                              fontSize: 14,
                             ),
                           ),
                         ],
@@ -157,21 +162,25 @@ class CartScreen extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         color: isDark ? Colors.black.withValues(alpha: 0.3) : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Column(
+                      child: Row(
                         children: [
                           IconButton(
-                            icon: FaIcon(FontAwesomeIcons.plus, size: 14, color: Theme.of(context).colorScheme.primary),
-                            onPressed: () => cart.addItem(item),
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                            padding: EdgeInsets.zero,
+                            icon: FaIcon(FontAwesomeIcons.minus, size: 10, color: Colors.grey),
+                            onPressed: () => cart.removeSingleItem(item.id),
                           ),
                           Text(
                             '${cartItem.quantity}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                           ),
                           IconButton(
-                            icon: FaIcon(FontAwesomeIcons.minus, size: 14, color: Colors.grey),
-                            onPressed: () => cart.removeSingleItem(item.id),
+                            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                            padding: EdgeInsets.zero,
+                            icon: FaIcon(FontAwesomeIcons.plus, size: 10, color: Theme.of(context).colorScheme.primary),
+                            onPressed: () => cart.addItem(item),
                           ),
                         ],
                       ),
@@ -182,47 +191,47 @@ class CartScreen extends StatelessWidget {
             },
           ),
         ),
-        _buildSummary(context, cart, isAr),
+        _buildSummary(context, cart, isAr, screenWidth),
       ],
     );
   }
 
-  Widget _buildSummary(BuildContext context, CartProvider cart, bool isAr) {
+  Widget _buildSummary(BuildContext context, CartProvider cart, bool isAr, double screenWidth) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
+    final isSmall = screenWidth < 380;
     
     return Container(
-      padding: const EdgeInsets.all(25),
+      padding: EdgeInsets.all(isSmall ? 15 : 25),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1B2E26) : Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(35)),
+        color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 25, spreadRadius: 5),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 15, spreadRadius: 2),
         ],
       ),
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // Compact Delivery Note
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 12),
-              margin: const EdgeInsets.only(bottom: 25),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              margin: const EdgeInsets.only(bottom: 15),
               decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
+                color: primaryColor.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  FaIcon(FontAwesomeIcons.truckFast, size: 16, color: primaryColor),
-                  const SizedBox(width: 12),
+                  FaIcon(FontAwesomeIcons.truckFast, size: 12, color: primaryColor),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       Translations.getText('delivery_note', isAr),
                       style: TextStyle(
-                        fontSize: 13,
-                        color: isDark ? Colors.white70 : Colors.black87,
-                        fontWeight: FontWeight.w500,
+                        fontSize: 11,
+                        color: isDark ? Colors.white60 : Colors.black54,
                       ),
                     ),
                   ),
@@ -234,46 +243,39 @@ class CartScreen extends StatelessWidget {
               children: [
                 Text(
                   Translations.getText('total', isAr),
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                 ),
                 Text(
                   '${cart.totalAmount.toStringAsFixed(2)} AED',
                   style: TextStyle(
-                    fontSize: 28,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                     color: primaryColor,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
             GestureDetector(
               onTap: () => _launchWhatsApp(context, cart, isAr),
               child: Container(
-                height: 65,
+                height: 55,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF25D366), Color(0xFF128C7E)],
                   ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF25D366).withValues(alpha: 0.3),
-                      blurRadius: 15,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
+                  borderRadius: BorderRadius.circular(15),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.white, size: 30),
-                    const SizedBox(width: 18),
+                    const FaIcon(FontAwesomeIcons.whatsapp, color: Colors.white, size: 24),
+                    const SizedBox(width: 12),
                     Text(
                       Translations.getText('order_whatsapp', isAr),
                       style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),

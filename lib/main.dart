@@ -1,21 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/language_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/menu_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/menu_screen.dart';
 import 'screens/cart_screen.dart';
 import 'widgets/responsive_layout.dart';
 import 'dart:ui';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    await Firebase.initializeApp(
+      options: FirebaseOptions(
+        apiKey: "AIzaSyC0OTLvYlB7xo1VUUFqcvmvdvn3DsScT4s",
+        authDomain: "shamiat.firebaseapp.com",
+        projectId: "shamiat",
+        storageBucket: "shamiat.firebasestorage.app",
+        messagingSenderId: "944141429395",
+        appId: "1:944141429395:web:034f453403a0ed9c47fb66",
+        measurementId: "G-VY27F0N9VG",
+      ),
+    );
+  } catch (e) {
+    debugPrint("Firebase initialization failed, using local fallbacks: $e");
+  }
+
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => LanguageProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => MenuProvider()),
       ],
       child: const ShamiatApp(),
     ),
@@ -42,7 +62,12 @@ class ShamiatApp extends StatelessWidget {
       themeMode: themeProvider.themeMode,
       locale: Locale(langProvider.isArabic ? 'ar' : 'en'),
       scrollBehavior: const MaterialScrollBehavior().copyWith(
-        dragDevices: {PointerDeviceKind.mouse, PointerDeviceKind.touch, PointerDeviceKind.stylus, PointerDeviceKind.trackpad},
+        dragDevices: {
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.touch,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.trackpad,
+        },
       ),
       theme: ThemeData(
         useMaterial3: true,
@@ -54,13 +79,21 @@ class ShamiatApp extends StatelessWidget {
           secondary: accentColor,
           surface: Colors.white,
           onSurface: const Color(0xFF1A1A1A),
-          background: lightBg,
         ),
         scaffoldBackgroundColor: lightBg,
         textTheme: const TextTheme(
-          displayLarge: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
-          displayMedium: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
-          titleLarge: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+          displayLarge: TextStyle(
+            color: primaryColor,
+            fontWeight: FontWeight.bold,
+          ),
+          displayMedium: TextStyle(
+            color: primaryColor,
+            fontWeight: FontWeight.bold,
+          ),
+          titleLarge: TextStyle(
+            color: primaryColor,
+            fontWeight: FontWeight.bold,
+          ),
           bodyLarge: TextStyle(color: Color(0xFF1A1A1A), fontSize: 16),
           bodyMedium: TextStyle(color: Color(0xFF4A4A4A), fontSize: 14),
         ),
@@ -93,13 +126,21 @@ class ShamiatApp extends StatelessWidget {
           secondary: primaryColor,
           surface: const Color(0xFF1B2E26),
           onSurface: Colors.white,
-          background: darkBg,
         ),
         scaffoldBackgroundColor: darkBg,
         textTheme: const TextTheme(
-          displayLarge: TextStyle(color: accentColor, fontWeight: FontWeight.bold),
-          displayMedium: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          titleLarge: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          displayLarge: TextStyle(
+            color: accentColor,
+            fontWeight: FontWeight.bold,
+          ),
+          displayMedium: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+          titleLarge: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
           bodyLarge: TextStyle(color: Colors.white, fontSize: 16),
           bodyMedium: TextStyle(color: Colors.white70, fontSize: 14),
         ),
@@ -188,10 +229,7 @@ class PageTransitionSwitcher extends StatelessWidget {
           ),
         );
       },
-      child: Container(
-        key: ValueKey<int>(currentIndex),
-        child: child,
-      ),
+      child: Container(key: ValueKey<int>(currentIndex), child: child),
     );
   }
 }

@@ -23,7 +23,7 @@ class ResponsiveLayout extends StatelessWidget {
     final isAr = context.watch<LanguageProvider>().isArabic;
     final isDark = context.watch<ThemeProvider>().isDarkMode;
     final primaryColor = Theme.of(context).colorScheme.primary;
-    final accentColor = Theme.of(context).colorScheme.secondary;
+    final _ = Theme.of(context).colorScheme.secondary;
     
     final activeItemColor = isDark ? Colors.white : primaryColor;
     final activeIconColor = isDark ? Colors.white : primaryColor;
@@ -80,7 +80,7 @@ class ResponsiveLayout extends StatelessWidget {
       bottomNavigationBar: isMobile
           ? Container(
               decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: isDark ? Colors.white10 : Colors.black.withOpacity(0.05))),
+                border: Border(top: BorderSide(color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05))),
               ),
               child: BottomNavigationBar(
                 currentIndex: currentIndex,
@@ -155,7 +155,7 @@ class ResponsiveLayout extends StatelessWidget {
           icon: const FaIcon(FontAwesomeIcons.basketShopping, size: 15),
           label: Text(Translations.getText('cart', isAr)),
           style: ElevatedButton.styleFrom(
-            backgroundColor: isSelected ? activeColor : (isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05)),
+            backgroundColor: isSelected ? activeColor : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
             foregroundColor: isSelected ? (isDark ? Colors.black : Colors.white) : (isDark ? Colors.white : Colors.black87),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
             elevation: 0,
