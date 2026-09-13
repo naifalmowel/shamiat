@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/language_provider.dart';
 import '../providers/menu_provider.dart';
 import '../data/translations.dart';
@@ -73,7 +74,7 @@ class HomeScreen extends StatelessWidget {
                         
                         Text(
                           'شــــاميات',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 34,
                             fontWeight: FontWeight.bold,
@@ -136,13 +137,7 @@ class HomeScreen extends StatelessWidget {
                         margin: const EdgeInsets.symmetric(horizontal: 5.0),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(25),
-                          image: item.imageUrl.isNotEmpty
-                              ? DecorationImage(
-                                  image: NetworkImage(item.imageUrl),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
-                          color: primaryColor.withValues(alpha: 0.2),
+                          color: Colors.black12,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withValues(alpha: 0.2),
@@ -151,40 +146,73 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            gradient: LinearGradient(
-                              begin: Alignment.bottomCenter,
-                              end: Alignment.topCenter,
-                              colors: [
-                                Colors.black.withValues(alpha: 0.8),
-                                Colors.transparent,
-                              ],
-                            ),
-                          ),
-                          padding: const EdgeInsets.all(25),
-                          alignment: isAr ? Alignment.bottomRight : Alignment.bottomLeft,
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(25),
+                          child: Stack(
                             children: [
-                              Text(
-                                isAr ? item.titleAr : item.titleEn,
-                                style: TextStyle(
-                                  color: accentColor,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 2,
+                              // Main Image
+                              Positioned.fill(
+                                child: item.imageUrl.isNotEmpty
+                                    ? CachedNetworkImage(
+                                        imageUrl: item.imageUrl,
+                                        fit: BoxFit.cover,
+                                        placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                                        errorWidget: (context, url, error) => Container(color: Colors.grey.shade900),
+                                      )
+                                    : Container(color: Colors.grey.shade900),
+                              ),
+                              
+                              // Darker Gradient Scrim from Bottom to improve contrast
+                              Positioned.fill(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      stops: const [0.2, 0.7, 1.0],
+                                      colors: [
+                                        Colors.black.withValues(alpha: 0.2), // Slight dark on top
+                                        Colors.black.withValues(alpha: 0.5), // Mid darken
+                                        Colors.black.withValues(alpha: 0.9), // Solid dark at text area
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 5),
-                              Text(
-                                isAr ? item.subTitleAr : item.subTitleEn,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+
+                              // Text Over the Dark Gradient
+                              Positioned(
+                                bottom: 20,
+                                left: 20,
+                                right: 20,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                                  children: [
+                                    // Title with custom shadow for extra clarity
+                                    Text(
+                                      isAr ? item.titleAr : item.titleEn,
+                                      style: TextStyle(
+                                        color: accentColor,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2,
+                                        shadows: const [Shadow(color: Colors.black, blurRadius: 4)],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    // Subtitle in Pure White
+                                    Text(
+                                      isAr ? item.subTitleAr : item.subTitleEn,
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold,
+                                        height: 1.1,
+                                        shadows: [Shadow(color: Colors.black, blurRadius: 8)],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ],

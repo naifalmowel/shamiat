@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/cart_provider.dart';
 import '../providers/language_provider.dart';
 import '../data/translations.dart';
@@ -11,14 +12,15 @@ class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
 
   Future<void> _launchWhatsApp(BuildContext context, CartProvider cart, bool isAr) async {
-    final phone = "971522242919"; 
+    const phone = "971522242919"; 
     String message = isAr 
         ? "السلام عليكم شاميات، أود طلب التالي:\n" 
         : "Hello Shamiat! I'd like to place an order:\n\n";
     
     cart.items.forEach((key, cartItem) {
       final name = isAr ? cartItem.item.nameAr : cartItem.item.nameEn;
-      message += "• $name x${cartItem.quantity} - ${cartItem.item.price * cartItem.quantity} AED\n";
+      final activePrice = cartItem.item.discountPrice ?? cartItem.item.price;
+      message += "• $name x${cartItem.quantity} - ${activePrice * cartItem.quantity} AED\n";
     });
     
     message += isAr 
@@ -33,11 +35,11 @@ class CartScreen extends StatelessWidget {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } else {
-    if(context.mounted){
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(isAr ? 'لا يمكن فتح واتساب حالياً' : 'Could not launch WhatsApp')),
-      );
-    }
+      if(context.mounted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(isAr ? 'لا يمكن فتح واتساب حالياً' : 'Could not launch WhatsApp')),
+        );
+      }
     }
   }
 
@@ -109,6 +111,9 @@ class CartScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final cartItem = cart.items.values.toList()[index];
               final item = cartItem.item;
+              final hasDiscount = item.discountPrice != null && item.discountPrice! > 0;
+              final activePrice = hasDiscount ? item.discountPrice! : item.price;
+
               return Container(
                 margin: const EdgeInsets.only(bottom: 12),
                 padding: const EdgeInsets.all(10),
@@ -128,11 +133,18 @@ class CartScreen extends StatelessWidget {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10),
-                      child: Image.network(
-                        item.imageUrl,
-                        width: 65,
-                        height: 65,
-                        fit: BoxFit.cover,
+                      child: Container(
+                        width: 70,
+                        height: 70,
+                        color: isDark ? Colors.white10 : Colors.grey.shade100,
+                        child: item.imageUrl.isNotEmpty
+                            ? CachedNetworkImage(
+                                imageUrl: item.imageUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => const Center(child: SizedBox(width: 15, height: 15, child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFFBC8A5F)))),
+                                errorWidget: (context, url, error) => Center(child: FaIcon(FontAwesomeIcons.bowlFood, size: 20, color: isDark ? Colors.white24 : Colors.black12)),
+                              )
+                            : Center(child: FaIcon(FontAwesomeIcons.bowlFood, size: 20, color: isDark ? Colors.white24 : Colors.black12)),
                       ),
                     ),
                     const SizedBox(width: 15),
@@ -142,18 +154,33 @@ class CartScreen extends StatelessWidget {
                         children: [
                           Text(
                             isAr ? item.nameAr : item.nameEn,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                           const SizedBox(height: 4),
-                          Text(
-                            '${item.price} AED',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
+                          Row(
+                            children: [
+                              if (hasDiscount) ...[
+                                Text(
+                                  '${item.price.toStringAsFixed(0)}',
+                                  style: TextStyle(
+                                    decoration: TextDecoration.lineThrough,
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                              ],
+                              Text(
+                                '${activePrice.toStringAsFixed(0)} AED',
+                                style: TextStyle(
+                                  color: hasDiscount ? const Color(0xFF2D6A4F) : Theme.of(context).colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -169,7 +196,7 @@ class CartScreen extends StatelessWidget {
                           IconButton(
                             constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                             padding: EdgeInsets.zero,
-                            icon: FaIcon(FontAwesomeIcons.minus, size: 10, color: Colors.grey),
+                            icon: const FaIcon(FontAwesomeIcons.minus, size: 10, color: Colors.grey),
                             onPressed: () => cart.removeSingleItem(item.id),
                           ),
                           Text(
@@ -200,6 +227,13 @@ class CartScreen extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final primaryColor = Theme.of(context).colorScheme.primary;
     final isSmall = screenWidth < 380;
+
+    // Calculate total savings
+    double totalOriginal = 0;
+    cart.items.forEach((key, cartItem) {
+      totalOriginal += cartItem.item.price * cartItem.quantity;
+    });
+    double savings = totalOriginal - cart.totalAmount;
     
     return Container(
       padding: EdgeInsets.all(isSmall ? 15 : 25),
@@ -214,41 +248,50 @@ class CartScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Compact Delivery Note
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              margin: const EdgeInsets.only(bottom: 15),
-              decoration: BoxDecoration(
-                color: primaryColor.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  FaIcon(FontAwesomeIcons.truckFast, size: 12, color: primaryColor),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      Translations.getText('delivery_note', isAr),
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: isDark ? Colors.white60 : Colors.black54,
-                      ),
+            if (savings > 0)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2D6A4F).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFF2D6A4F).withValues(alpha: 0.2)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.celebration, color: Color(0xFF2D6A4F), size: 18),
+                    const SizedBox(width: 8),
+                    Text(
+                      isAr ? "لقد وفرت ${savings.toStringAsFixed(0)} درهم في هذا الطلب!" : "You saved ${savings.toStringAsFixed(0)} AED on this order!",
+                      style: const TextStyle(color: Color(0xFF2D6A4F), fontWeight: FontWeight.bold, fontSize: 14),
                     ),
-                  ),
-                ],
-              ),
-            ),
+                  ],
+                ),
+              ).animate().fadeIn().shake(),
+            
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  Translations.getText('total', isAr),
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                Column(
+                  crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      Translations.getText('total', isAr),
+                      style: TextStyle(fontSize: 14, color: isDark ? Colors.white60 : Colors.grey.shade700),
+                    ),
+                    if (savings > 0)
+                      Text(
+                        '${totalOriginal.toStringAsFixed(0)} AED',
+                        style: TextStyle(fontSize: 15, color: Colors.grey, decoration: TextDecoration.lineThrough, height: 1.2),
+                      ),
+                  ],
                 ),
                 Text(
                   '${cart.totalAmount.toStringAsFixed(2)} AED',
                   style: TextStyle(
-                    fontSize: 22,
+                    fontSize: 26,
                     fontWeight: FontWeight.bold,
                     color: primaryColor,
                   ),

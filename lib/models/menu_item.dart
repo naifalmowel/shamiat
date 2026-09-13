@@ -7,9 +7,9 @@ class MenuItem {
   final double price;
   final double? discountPrice;
   final String imageUrl;
-  final String category;
+  final String category; 
   final bool isAvailable;
-  final List<String>? options;
+  final int order;
 
   MenuItem({
     required this.id,
@@ -22,7 +22,7 @@ class MenuItem {
     required this.imageUrl,
     required this.category,
     this.isAvailable = true,
-    this.options,
+    this.order = 0,
   });
 
   factory MenuItem.fromMap(Map<String, dynamic> map, String docId) {
@@ -35,11 +35,9 @@ class MenuItem {
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
       discountPrice: (map['discountPrice'] as num?)?.toDouble(),
       imageUrl: map['imageUrl'] ?? '',
-      category: map['category'] ?? 'others',
+      category: map['category'] ?? '',
       isAvailable: map['isAvailable'] ?? true,
-      options: map['options'] != null
-          ? List<String>.from(map['options'])
-          : null,
+      order: map['order'] ?? 0,
     );
   }
 
@@ -54,7 +52,7 @@ class MenuItem {
       'imageUrl': imageUrl,
       'category': category,
       'isAvailable': isAvailable,
-      'options': options,
+      'order': order,
     };
   }
 }
@@ -66,6 +64,9 @@ class CarouselItem {
   final String titleEn;
   final String subTitleAr;
   final String subTitleEn;
+  final String? actionUrl;
+  final bool isActive;
+  final int order;
 
   CarouselItem({
     required this.id,
@@ -74,6 +75,9 @@ class CarouselItem {
     required this.titleEn,
     required this.subTitleAr,
     required this.subTitleEn,
+    this.actionUrl,
+    this.isActive = true,
+    this.order = 0,
   });
 
   factory CarouselItem.fromMap(Map<String, dynamic> map, String docId) {
@@ -84,6 +88,9 @@ class CarouselItem {
       titleEn: map['titleEn'] ?? '',
       subTitleAr: map['subTitleAr'] ?? '',
       subTitleEn: map['subTitleEn'] ?? '',
+      actionUrl: map['actionUrl'],
+      isActive: map['isActive'] ?? true,
+      order: map['order'] ?? 0,
     );
   }
 
@@ -94,6 +101,9 @@ class CarouselItem {
       'titleEn': titleEn,
       'subTitleAr': subTitleAr,
       'subTitleEn': subTitleEn,
+      'actionUrl': actionUrl,
+      'isActive': isActive,
+      'order': order,
     };
   }
 }
