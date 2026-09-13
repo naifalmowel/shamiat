@@ -15,7 +15,20 @@ class CartProvider with ChangeNotifier {
 
   int get itemCount => _items.length;
 
+  // الإجمالي الفعلي (بعد الخصومات)
   double get totalAmount {
+    double total = 0.0;
+    _items.forEach((key, cartItem) {
+      final activePrice = (cartItem.item.discountPrice != null && cartItem.item.discountPrice! > 0)
+          ? cartItem.item.discountPrice!
+          : cartItem.item.price;
+      total += activePrice * cartItem.quantity;
+    });
+    return total;
+  }
+
+  // الإجمالي الأصلي (قبل الخصومات) للمقارنة
+  double get totalOriginalAmount {
     double total = 0.0;
     _items.forEach((key, cartItem) {
       total += cartItem.item.price * cartItem.quantity;

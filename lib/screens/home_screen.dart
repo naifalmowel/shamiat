@@ -24,6 +24,10 @@ class HomeScreen extends StatelessWidget {
 
     final carouselItems = menuProvider.carouselItems;
 
+    // Fixed colors for the Carousel regardless of theme mode
+    const carouselTitleColor = Color(0xFFBC8A5F); // Copper/Gold from Light Mode
+    const carouselSubtitleColor = Colors.white;
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -150,7 +154,6 @@ class HomeScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(25),
                           child: Stack(
                             children: [
-                              // Main Image
                               Positioned.fill(
                                 child: item.imageUrl.isNotEmpty
                                     ? CachedNetworkImage(
@@ -162,25 +165,23 @@ class HomeScreen extends StatelessWidget {
                                     : Container(color: Colors.grey.shade900),
                               ),
                               
-                              // Darker Gradient Scrim from Bottom to improve contrast
                               Positioned.fill(
                                 child: Container(
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       begin: Alignment.topCenter,
                                       end: Alignment.bottomCenter,
-                                      stops: const [0.2, 0.7, 1.0],
+                                      stops: const [0.0, 0.5, 1.0],
                                       colors: [
-                                        Colors.black.withValues(alpha: 0.2), // Slight dark on top
-                                        Colors.black.withValues(alpha: 0.5), // Mid darken
-                                        Colors.black.withValues(alpha: 0.9), // Solid dark at text area
+                                        Colors.black.withValues(alpha: 0.2),
+                                        Colors.black.withValues(alpha: 0.4),
+                                        Colors.black.withValues(alpha: 0.95),
                                       ],
                                     ),
                                   ),
                                 ),
                               ),
 
-                              // Text Over the Dark Gradient
                               Positioned(
                                 bottom: 20,
                                 left: 20,
@@ -189,27 +190,25 @@ class HomeScreen extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: isAr ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                                   children: [
-                                    // Title with custom shadow for extra clarity
                                     Text(
                                       isAr ? item.titleAr : item.titleEn,
-                                      style: TextStyle(
-                                        color: accentColor,
+                                      style: const TextStyle(
+                                        color: carouselTitleColor, // Always Copper
                                         fontSize: 14,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 2,
-                                        shadows: const [Shadow(color: Colors.black, blurRadius: 4)],
+                                        shadows: [Shadow(color: Colors.black, blurRadius: 6)],
                                       ),
                                     ),
                                     const SizedBox(height: 4),
-                                    // Subtitle in Pure White
                                     Text(
                                       isAr ? item.subTitleAr : item.subTitleEn,
                                       style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
+                                        color: carouselSubtitleColor, // Always White
+                                        fontSize: 22,
                                         fontWeight: FontWeight.bold,
                                         height: 1.1,
-                                        shadows: [Shadow(color: Colors.black, blurRadius: 8)],
+                                        shadows: [Shadow(color: Colors.black, blurRadius: 10)],
                                       ),
                                     ),
                                   ],

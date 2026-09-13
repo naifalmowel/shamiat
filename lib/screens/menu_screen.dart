@@ -25,18 +25,15 @@ class _MenuScreenState extends State<MenuScreen> {
     final menuProvider = context.watch<MenuProvider>();
 
     final dynamicCategories = menuProvider.categories;
-
-    // Auto-select first category if none selected
+    
     if (selectedCategoryId == null && dynamicCategories.isNotEmpty) {
       selectedCategoryId = dynamicCategories.first.id;
     }
 
-    // Filter items from MenuProvider dynamically by String category ID
-    final filteredItems = selectedCategoryId == null
-        ? menuProvider.menuItems
-        : menuProvider.menuItems
-              .where((item) => item.category == selectedCategoryId)
-              .toList();
+    // منطق التصفية الذكي
+    final filteredItems = selectedCategoryId == 'offers_category'
+        ? menuProvider.menuItems.where((item) => item.discountPrice != null && item.discountPrice! > 0).toList()
+        : menuProvider.menuItems.where((item) => item.category.trim() == selectedCategoryId!.trim()).toList();
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 800;
@@ -44,7 +41,7 @@ class _MenuScreenState extends State<MenuScreen> {
 
     return Column(
       children: [
-        // Category Selector (Dynamic from Firebase)
+        // Category Selector
         Container(
           height: 110,
           padding: const EdgeInsets.only(top: 10, bottom: 5),
@@ -53,10 +50,7 @@ class _MenuScreenState extends State<MenuScreen> {
               Expanded(
                 child: ScrollConfiguration(
                   behavior: ScrollConfiguration.of(context).copyWith(
-                    dragDevices: {
-                      PointerDeviceKind.touch,
-                      PointerDeviceKind.mouse,
-                    },
+                    dragDevices: {PointerDeviceKind.touch, PointerDeviceKind.mouse},
                   ),
                   child: ListView.builder(
                     controller: _categoryScrollController,
@@ -66,63 +60,44 @@ class _MenuScreenState extends State<MenuScreen> {
                     itemBuilder: (context, index) {
                       final cat = dynamicCategories[index];
                       final isSelected = selectedCategoryId == cat.id;
+                      final isOffers = cat.id == 'offers_category';
+
                       return GestureDetector(
-                        onTap: () =>
-                            setState(() => selectedCategoryId = cat.id),
+                        onTap: () => setState(() => selectedCategoryId = cat.id),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           margin: const EdgeInsets.only(right: 12, bottom: 5),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 18,
-                            vertical: 6,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
                           decoration: BoxDecoration(
-                            color: isSelected
-                                ? primaryColor
-                                : (isDark
-                                      ? Colors.white.withValues(alpha: 0.05)
-                                      : Colors.white),
+                            color: isSelected ? (isOffers ? Colors.orange.shade800 : primaryColor) : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
                             borderRadius: BorderRadius.circular(15),
-                            boxShadow: isSelected
-                                ? [
-                                    BoxShadow(
-                                      color: primaryColor.withValues(
-                                        alpha: 0.2,
-                                      ),
-                                      blurRadius: 6,
-                                    ),
-                                  ]
-                                : [],
                             border: Border.all(
-                              color: isSelected
-                                  ? primaryColor
-                                  : (isDark
-                                        ? Colors.white10
-                                        : Colors.black.withValues(alpha: 0.05)),
+                              color: isSelected ? (isOffers ? Colors.orange : primaryColor) : (isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.05)),
                             ),
+                            boxShadow: isSelected ? [BoxShadow(color: (isOffers ? Colors.orange : primaryColor).withValues(alpha: 0.3), blurRadius: 8)] : [],
                           ),
                           child: Center(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
-                                  isAr ? cat.nameAr : cat.nameEn,
-                                  style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white
-                                        : Theme.of(
-                                            context,
-                                          ).textTheme.bodyLarge?.color,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13,
-                                  ),
+                                Row(
+                                  children: [
+                                    if(isOffers) const Icon(Icons.local_offer, size: 14, color: Colors.white),
+                                    if(isOffers) const SizedBox(width: 5),
+                                    Text(
+                                      isAr ? cat.nameAr : cat.nameEn,
+                                      style: TextStyle(
+                                        color: isSelected ? Colors.white : Theme.of(context).textTheme.bodyLarge?.color,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 Text(
                                   isAr ? cat.nameEn : cat.nameAr,
                                   style: TextStyle(
-                                    color: isSelected
-                                        ? Colors.white70
-                                        : Colors.grey,
+                                    color: isSelected ? Colors.white70 : Colors.grey,
                                     fontSize: 9,
                                     fontWeight: FontWeight.w300,
                                   ),
@@ -144,24 +119,21 @@ class _MenuScreenState extends State<MenuScreen> {
                   color: Colors.grey.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child:
-                    Center(
-                          child: Container(
-                            width: 15,
-                            height: 3,
-                            decoration: BoxDecoration(
-                              color: primaryColor.withValues(alpha: 0.4),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                        )
-                        .animate(onPlay: (c) => c.repeat(reverse: true))
-                        .moveX(begin: -10, end: 10, duration: 1.5.seconds),
+                child: Center(
+                  child: Container(
+                    width: 15,
+                    height: 3,
+                    decoration: BoxDecoration(
+                      color: primaryColor.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ).animate(onPlay: (c) => c.repeat(reverse: true)).moveX(begin: -10, end: 10, duration: 1.5.seconds),
               ),
             ],
           ),
         ),
-
+        
         // Grid with dynamic items
         Expanded(
           child: filteredItems.isEmpty
@@ -169,20 +141,13 @@ class _MenuScreenState extends State<MenuScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.no_meals_outlined,
-                        size: 60,
-                        color: Colors.grey.shade300,
-                      ),
-                      const SizedBox(height: 10),
+                      Icon(selectedCategoryId == 'offers_category' ? Icons.celebration_outlined : Icons.no_meals_outlined, size: 80, color: Colors.grey.shade300),
+                      const SizedBox(height: 15),
                       Text(
-                        isAr
-                            ? 'لا توجد منتجات في هذه الفئة حالياً'
-                            : 'No items in this category yet',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
+                        selectedCategoryId == 'offers_category'
+                            ? (isAr ? 'انتظروا عروضنا القوية قريباً!' : 'Stay tuned for our great offers!')
+                            : (isAr ? 'لا توجد منتجات في هذه الفئة حالياً' : 'No items in this category yet'),
+                        style: const TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),

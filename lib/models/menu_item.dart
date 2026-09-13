@@ -26,17 +26,20 @@ class MenuItem {
   });
 
   factory MenuItem.fromMap(Map<String, dynamic> map, String docId) {
+    // Handling potential variation in field names from Dashboard
+    String catId = map['category'] ?? map['categoryId'] ?? map['category_id'] ?? '';
+    
     return MenuItem(
       id: docId,
-      nameAr: map['nameAr'] ?? '',
-      nameEn: map['nameEn'] ?? '',
-      descriptionAr: map['descriptionAr'] ?? '',
-      descriptionEn: map['descriptionEn'] ?? '',
+      nameAr: map['nameAr'] ?? map['name_ar'] ?? '',
+      nameEn: map['nameEn'] ?? map['name_en'] ?? '',
+      descriptionAr: map['descriptionAr'] ?? map['description_ar'] ?? '',
+      descriptionEn: map['descriptionEn'] ?? map['description_en'] ?? '',
       price: (map['price'] as num?)?.toDouble() ?? 0.0,
-      discountPrice: (map['discountPrice'] as num?)?.toDouble(),
-      imageUrl: map['imageUrl'] ?? '',
-      category: map['category'] ?? '',
-      isAvailable: map['isAvailable'] ?? true,
+      discountPrice: (map['discountPrice'] as num?)?.toDouble() ?? (map['discount_price'] as num?)?.toDouble(),
+      imageUrl: map['imageUrl'] ?? map['image_url'] ?? map['image'] ?? '',
+      category: catId.trim(),
+      isAvailable: map['isAvailable'] ?? map['is_available'] ?? true,
       order: map['order'] ?? 0,
     );
   }
@@ -83,13 +86,13 @@ class CarouselItem {
   factory CarouselItem.fromMap(Map<String, dynamic> map, String docId) {
     return CarouselItem(
       id: docId,
-      imageUrl: map['imageUrl'] ?? '',
-      titleAr: map['titleAr'] ?? '',
-      titleEn: map['titleEn'] ?? '',
-      subTitleAr: map['subTitleAr'] ?? '',
-      subTitleEn: map['subTitleEn'] ?? '',
-      actionUrl: map['actionUrl'],
-      isActive: map['isActive'] ?? true,
+      imageUrl: map['imageUrl'] ?? map['image_url'] ?? '',
+      titleAr: map['titleAr'] ?? map['title_ar'] ?? '',
+      titleEn: map['titleEn'] ?? map['title_en'] ?? '',
+      subTitleAr: map['subTitleAr'] ?? map['sub_title_ar'] ?? '',
+      subTitleEn: map['subTitleEn'] ?? map['sub_title_en'] ?? '',
+      actionUrl: map['actionUrl'] ?? map['action_url'],
+      isActive: map['isActive'] ?? map['is_active'] ?? true,
       order: map['order'] ?? 0,
     );
   }
