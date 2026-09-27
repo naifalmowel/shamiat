@@ -3,6 +3,7 @@ class Translations {
     'home': {'ar': 'الرئيسية', 'en': 'Home'},
     'menu': {'ar': 'القائمة', 'en': 'Menu'},
     'cart': {'ar': 'السلة', 'en': 'Cart'},
+    'contact': {'ar': 'تواصل معنا', 'en': 'Contact'},
     'explore_menu': {'ar': 'اكتشف المنيو', 'en': 'Explore Menu'},
     'daily_offers': {'ar': 'عروض اليوم', 'en': 'Daily Offers'},
     'add_to_cart': {'ar': 'إضافة للسلة', 'en': 'Add to Cart'},
@@ -21,6 +22,16 @@ class Translations {
       'ar': 'الذوق الشامي الأصيل في قلب رأس الخيمة',
       'en': 'Authentic Levantine Taste in the Heart of RAK'
     },
+    'call_us': {'ar': 'الجوال', 'en': 'Mobile'},
+    'landline': {'ar': 'الهاتف الأرضي', 'en': 'Landline Phone'},
+    'whatsapp': {'ar': 'واتساب', 'en': 'WhatsApp'},
+    'location': {'ar': 'موقعنا', 'en': 'Our Location'},
+    'branch_info': {'ar': 'الفرع الرئيسي - رأس الخيمة', 'en': 'Main Branch - RAK'},
+    'address': {
+      'ar': 'رأس الخيمة - النخيل - شارع المنتصر - مقابل أبراج الدانة',
+      'en': 'Ras Al Khaimah - Al Nakheel - Al Montasser Street - Opposite Al Dana Towers'
+    },
+    'social_media': {'ar': 'تابعنا على التواصل الاجتماعي', 'en': 'Follow us on Social Media'},
   };
 
   static String getText(String key, bool isArabic) {

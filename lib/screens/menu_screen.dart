@@ -26,18 +26,31 @@ class _MenuScreenState extends State<MenuScreen> {
 
     final dynamicCategories = menuProvider.categories;
     
+    // Auto-select first category if none selected
     if (selectedCategoryId == null && dynamicCategories.isNotEmpty) {
       selectedCategoryId = dynamicCategories.first.id;
     }
 
-    // منطق التصفية الذكي
-    final filteredItems = selectedCategoryId == 'offers_category'
-        ? menuProvider.menuItems.where((item) => item.discountPrice != null && item.discountPrice! > 0).toList()
-        : menuProvider.menuItems.where((item) => item.category.trim() == selectedCategoryId!.trim()).toList();
+    // Safety check: handle empty or null selectedCategoryId
+    final List filteredItems;
+    if (selectedCategoryId == null) {
+      filteredItems = [];
+    } else if (selectedCategoryId == 'offers_category') {
+      filteredItems = menuProvider.menuItems.where((item) => (item.discountPrice ?? 0) > 0).toList();
+    } else {
+      filteredItems = menuProvider.menuItems.where((item) {
+        // Trim to be safe against trailing spaces in Firestore
+        return item.category.trim() == selectedCategoryId!.trim();
+      }).toList();
+    }
 
     final screenWidth = MediaQuery.of(context).size.width;
     final isMobile = screenWidth < 800;
-    final isNarrow = screenWidth < 380;
+    
+    int crossAxisCount = isMobile ? 2 : (screenWidth > 1400 ? 5 : 4);
+    double aspectRatio = isMobile 
+      ? (screenWidth < 380 ? 0.62 : 0.72) 
+      : 0.82; 
 
     return Column(
       children: [
@@ -67,7 +80,7 @@ class _MenuScreenState extends State<MenuScreen> {
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           margin: const EdgeInsets.only(right: 12, bottom: 5),
-                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           decoration: BoxDecoration(
                             color: isSelected ? (isOffers ? Colors.orange.shade800 : primaryColor) : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
                             borderRadius: BorderRadius.circular(15),
@@ -141,24 +154,35 @@ class _MenuScreenState extends State<MenuScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(selectedCategoryId == 'offers_category' ? Icons.celebration_outlined : Icons.no_meals_outlined, size: 80, color: Colors.grey.shade300),
+                      Icon(
+                        (selectedCategoryId == 'offers_category') 
+                          ? Icons.celebration_outlined 
+                          : (menuProvider.isLoading ? Icons.hourglass_empty : Icons.no_meals_outlined), 
+                        size: 80, 
+                        color: Colors.grey.shade300
+                      ),
                       const SizedBox(height: 15),
                       Text(
-                        selectedCategoryId == 'offers_category'
-                            ? (isAr ? 'انتظروا عروضنا القوية قريباً!' : 'Stay tuned for our great offers!')
-                            : (isAr ? 'لا توجد منتجات في هذه الفئة حالياً' : 'No items in this category yet'),
+                        menuProvider.isLoading 
+                          ? (isAr ? 'جاري التحميل...' : 'Loading...')
+                          : (selectedCategoryId == 'offers_category'
+                              ? (isAr ? 'انتظروا عروضنا القوية قريباً!' : 'Stay tuned for our great offers!')
+                              : (isAr ? 'لا توجد منتجات في هذه الفئة حالياً' : 'No items in this category yet')),
                         style: const TextStyle(fontSize: 18, color: Colors.grey, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
                 )
               : GridView.builder(
-                  padding: const EdgeInsets.fromLTRB(15, 5, 15, 20),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isMobile ? 15 : 40, 
+                    vertical: 20
+                  ),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: isMobile ? 2 : (screenWidth > 1200 ? 4 : 3),
-                    childAspectRatio: isNarrow ? 0.62 : 0.72,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 12,
+                    crossAxisCount: crossAxisCount,
+                    childAspectRatio: aspectRatio,
+                    crossAxisSpacing: isMobile ? 12 : 25,
+                    mainAxisSpacing: isMobile ? 12 : 25,
                   ),
                   itemCount: filteredItems.length,
                   itemBuilder: (context, index) {

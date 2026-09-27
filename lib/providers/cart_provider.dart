@@ -4,8 +4,31 @@ import '../models/menu_item.dart';
 class CartItem {
   final MenuItem item;
   int quantity;
+  final List<OptionChoice> selectedChoices;
 
-  CartItem({required this.item, this.quantity = 1});
+  CartItem({
+    required this.item,
+    this.quantity = 1,
+    this.selectedChoices = const [],
+  });
+
+  double get optionsExtraPrice {
+    return selectedChoices.fold(0.0, (sum, choice) => sum + choice.price);
+  }
+
+  double get activeUnitPrice {
+    double p = item.price;
+    double d = item.discountPrice ?? 0;
+    double base = (d > 0) ? (d < p ? d : p) : p;
+    return base + optionsExtraPrice;
+  }
+
+  double get originalUnitPrice {
+    double p = item.price;
+    double d = item.discountPrice ?? 0;
+    double base = (d > 0) ? (d > p ? d : p) : p;
+    return base + optionsExtraPrice;
+  }
 }
 
 class CartProvider with ChangeNotifier {
@@ -15,68 +38,89 @@ class CartProvider with ChangeNotifier {
 
   int get itemCount => _items.length;
 
-  // الإجمالي الفعلي (بعد الخصومات)
   double get totalAmount {
     double total = 0.0;
     _items.forEach((key, cartItem) {
-      final activePrice = (cartItem.item.discountPrice != null && cartItem.item.discountPrice! > 0)
-          ? cartItem.item.discountPrice!
-          : cartItem.item.price;
-      total += activePrice * cartItem.quantity;
+      total += cartItem.activeUnitPrice * cartItem.quantity;
     });
     return total;
   }
 
-  // الإجمالي الأصلي (قبل الخصومات) للمقارنة
   double get totalOriginalAmount {
     double total = 0.0;
     _items.forEach((key, cartItem) {
-      total += cartItem.item.price * cartItem.quantity;
+      total += cartItem.originalUnitPrice * cartItem.quantity;
     });
     return total;
   }
 
-  void addItem(MenuItem item) {
-    if (_items.containsKey(item.id)) {
+  String _generateCartKey(String itemId, List<OptionChoice> choices) {
+    if (choices.isEmpty) return itemId;
+    final choiceKeys = choices.map((c) => '${c.nameAr}_${c.price}').toList()..sort();
+    return '${itemId}_${choiceKeys.join('_')}';
+  }
+
+  void addItem(MenuItem item, {List<OptionChoice> selectedChoices = const []}) {
+    final String key = _generateCartKey(item.id, selectedChoices);
+
+    if (_items.containsKey(key)) {
       _items.update(
-        item.id,
+        key,
         (existing) => CartItem(
           item: existing.item,
           quantity: existing.quantity + 1,
+          selectedChoices: existing.selectedChoices,
         ),
       );
     } else {
       _items.putIfAbsent(
-        item.id,
-        () => CartItem(item: item),
-      );
-    }
-    notifyListeners();
-  }
-
-  void removeItem(String id) {
-    _items.remove(id);
-    notifyListeners();
-  }
-
-  void removeSingleItem(String id) {
-    if (!_items.containsKey(id)) return;
-    if (_items[id]!.quantity > 1) {
-      _items.update(
-        id,
-        (existing) => CartItem(
-          item: existing.item,
-          quantity: existing.quantity - 1,
+        key,
+        () => CartItem(
+          item: item,
+          selectedChoices: List.from(selectedChoices),
         ),
       );
-    } else {
-      _items.remove(id);
     }
     notifyListeners();
   }
 
-  int getQuantity(String id) {
-    return _items[id]?.quantity ?? 0;
+  void removeItem(String key) {
+    _items.remove(key);
+    notifyListeners();
+  }
+
+  void removeSingleItem(String keyOrItemId) {
+    if (_items.containsKey(keyOrItemId)) {
+      if (_items[keyOrItemId]!.quantity > 1) {
+        _items[keyOrItemId]!.quantity--;
+      } else {
+        _items.remove(keyOrItemId);
+      }
+      notifyListeners();
+      return;
+    }
+
+    // Fallback: search for items matching item.id
+    final matchingKeys = _items.entries.where((e) => e.value.item.id == keyOrItemId).map((e) => e.key).toList();
+    if (matchingKeys.isNotEmpty) {
+      final keyToRemove = matchingKeys.last;
+      if (_items[keyToRemove]!.quantity > 1) {
+        _items[keyToRemove]!.quantity--;
+      } else {
+        _items.remove(keyToRemove);
+      }
+      notifyListeners();
+    }
+  }
+
+  int getQuantity(String itemId) {
+    int count = 0;
+    _items.forEach((key, cartItem) {
+      if (cartItem.item.id == itemId) {
+        count += cartItem.quantity;
+      }
+    });
+    return count;
   }
 
   void clearCart() {

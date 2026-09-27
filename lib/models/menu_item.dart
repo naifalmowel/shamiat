@@ -1,3 +1,72 @@
+class OptionChoice {
+  final String nameAr;
+  final String nameEn;
+  final double price;
+
+  OptionChoice({
+    required this.nameAr,
+    required this.nameEn,
+    this.price = 0.0,
+  });
+
+  factory OptionChoice.fromMap(Map<String, dynamic> map) {
+    return OptionChoice(
+      nameAr: map['nameAr'] ?? map['name_ar'] ?? '',
+      nameEn: map['nameEn'] ?? map['name_en'] ?? '',
+      price: (map['price'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'nameAr': nameAr,
+      'nameEn': nameEn,
+      'price': price,
+    };
+  }
+}
+
+class MenuItemOptionGroup {
+  final String titleAr;
+  final String titleEn;
+  final String type; // 'single' or 'multiple'
+  final bool required;
+  final List<OptionChoice> choices;
+
+  MenuItemOptionGroup({
+    required this.titleAr,
+    required this.titleEn,
+    this.type = 'single',
+    this.required = false,
+    required this.choices,
+  });
+
+  factory MenuItemOptionGroup.fromMap(Map<String, dynamic> map) {
+    var rawChoices = map['choices'] as List? ?? [];
+    List<OptionChoice> choicesList = rawChoices
+        .map((c) => OptionChoice.fromMap(Map<String, dynamic>.from(c)))
+        .toList();
+
+    return MenuItemOptionGroup(
+      titleAr: map['titleAr'] ?? map['title_ar'] ?? '',
+      titleEn: map['titleEn'] ?? map['title_en'] ?? '',
+      type: map['type'] ?? 'single',
+      required: map['required'] ?? false,
+      choices: choicesList,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'titleAr': titleAr,
+      'titleEn': titleEn,
+      'type': type,
+      'required': required,
+      'choices': choices.map((c) => c.toMap()).toList(),
+    };
+  }
+}
+
 class MenuItem {
   final String id;
   final String nameAr;
@@ -10,6 +79,7 @@ class MenuItem {
   final String category; 
   final bool isAvailable;
   final int order;
+  final List<MenuItemOptionGroup> options;
 
   MenuItem({
     required this.id,
@@ -23,12 +93,18 @@ class MenuItem {
     required this.category,
     this.isAvailable = true,
     this.order = 0,
+    this.options = const [],
   });
 
   factory MenuItem.fromMap(Map<String, dynamic> map, String docId) {
     // Handling potential variation in field names from Dashboard
     String catId = map['category'] ?? map['categoryId'] ?? map['category_id'] ?? '';
     
+    var rawOptions = map['options'] as List? ?? [];
+    List<MenuItemOptionGroup> optionsList = rawOptions
+        .map((o) => MenuItemOptionGroup.fromMap(Map<String, dynamic>.from(o)))
+        .toList();
+
     return MenuItem(
       id: docId,
       nameAr: map['nameAr'] ?? map['name_ar'] ?? '',
@@ -41,6 +117,7 @@ class MenuItem {
       category: catId.trim(),
       isAvailable: map['isAvailable'] ?? map['is_available'] ?? true,
       order: map['order'] ?? 0,
+      options: optionsList,
     );
   }
 
@@ -56,6 +133,7 @@ class MenuItem {
       'category': category,
       'isAvailable': isAvailable,
       'order': order,
+      'options': options.map((o) => o.toMap()).toList(),
     };
   }
 }
