@@ -32,6 +32,18 @@ class Translations {
       'en': 'Ras Al Khaimah - Al Nakheel - Al Montasser Street - Opposite Al Dana Towers'
     },
     'social_media': {'ar': 'تابعنا على التواصل الاجتماعي', 'en': 'Follow us on Social Media'},
+    'order_type': {'ar': 'نوع الطلب', 'en': 'Order Type'},
+    'delivery': {'ar': 'توصيل منازل', 'en': 'Delivery'},
+    'takeaway': {'ar': 'استلام من الفرع', 'en': 'Takeaway'},
+    'full_name': {'ar': 'الاسم الكامل', 'en': 'Full Name'},
+    'phone_number': {'ar': 'رقم الجوال', 'en': 'Phone Number'},
+    'address_details': {'ar': 'العنوان التفصيلي (المنطقة، الشارع، البناية، الشقة)', 'en': 'Detailed Address (Area, Street, Building, Apt)'},
+    'saved_addresses': {'ar': 'عناويني المحفوظة', 'en': 'Saved Addresses'},
+    'add_new_address': {'ar': 'عنوان جديد', 'en': 'New Address'},
+    'save_address_future': {'ar': 'حفظ العنوان للطلبات القادمة', 'en': 'Save address for future orders'},
+    'get_location': {'ar': 'تحديد موقعي على الخريطة', 'en': 'Get My Map Location'},
+    'confirm_and_send': {'ar': 'إرسال الطلب عبر الواتساب', 'en': 'Send Order on WhatsApp'},
+    'please_fill_required': {'ar': 'يرجى إكمال جميع البيانات المطلوبة', 'en': 'Please fill in all required fields'},
   };
 
   static String getText(String key, bool isArabic) {

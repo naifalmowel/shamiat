@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -9,6 +8,7 @@ import '../providers/language_provider.dart';
 import '../providers/settings_provider.dart';
 import '../models/app_settings_model.dart';
 import '../data/translations.dart';
+import '../widgets/order_checkout_modal.dart';
 
 class CartScreen extends StatelessWidget {
   const CartScreen({super.key});
@@ -60,43 +60,25 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _launchWhatsApp(BuildContext context, CartProvider cart, bool isAr, double deliveryFee) async {
-    final settings = context.read<SettingsProvider>().settings;
-    final phone = settings.whatsappNumber.replaceAll('+', '').replaceAll(' ', ''); 
-    String message = isAr 
-        ? "السلام عليكم شاميات، أود طلب التالي:\n" 
-        : "Hello Shamiat! I'd like to place an order:\n\n";
-    
-    cart.items.forEach((key, cartItem) {
-      final name = isAr ? cartItem.item.nameAr : cartItem.item.nameEn;
-      final optionsText = cartItem.selectedChoices.isNotEmpty
-          ? " (${cartItem.selectedChoices.map((c) => isAr ? c.nameAr : c.nameEn).join('، ')})"
-          : "";
-      final itemTotal = cartItem.activeUnitPrice * cartItem.quantity;
-      message += "• $name$optionsText x${cartItem.quantity} - ${itemTotal.toStringAsFixed(2)} AED\n";
-    });
-    
-    if (deliveryFee > 0) {
-      message += isAr ? "\nرسوم التوصيل: $deliveryFee AED" : "\nDelivery Fee: $deliveryFee AED";
-    }
-
-    message += isAr 
-        ? "\nالإجمالي النهائي: ${(cart.totalAmount + deliveryFee).toStringAsFixed(2)} AED"
-        : "\nFinal Total: ${(cart.totalAmount + deliveryFee).toStringAsFixed(2)} AED";
-    
-    message += "\n\n${Translations.getText('delivery_note', isAr)}";
-    
-    final url = "https://wa.me/$phone?text=${Uri.encodeComponent(message)}";
-    
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
-    } else {
-      if(context.mounted){
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(isAr ? 'لا يمكن فتح واتساب حالياً' : 'Could not launch WhatsApp')),
-        );
-      }
-    }
+  void _showCheckoutModal(
+    BuildContext context,
+    CartProvider cart,
+    bool isAr,
+    bool isDark,
+    AppSettingsModel settings,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => OrderCheckoutModal(
+        cart: cart,
+        isAr: isAr,
+        isDark: isDark,
+        deliveryFee: settings.deliveryFee,
+        whatsappPhone: settings.whatsappNumber,
+      ),
+    );
   }
 
   @override
@@ -401,7 +383,7 @@ class CartScreen extends StatelessWidget {
               )
             else
               GestureDetector(
-                onTap: canCheckout ? () => _launchWhatsApp(context, cart, isAr, settings.deliveryFee) : null,
+                onTap: canCheckout ? () => _showCheckoutModal(context, cart, isAr, isDark, settings) : null,
                 child: Opacity(
                   opacity: canCheckout ? 1.0 : 0.5,
                   child: Container(

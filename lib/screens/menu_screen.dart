@@ -45,11 +45,12 @@ class _MenuScreenState extends State<MenuScreen> {
     }
 
     final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     final isMobile = screenWidth < 800;
     
     int crossAxisCount = isMobile ? 2 : (screenWidth > 1400 ? 5 : 4);
     double aspectRatio = isMobile 
-      ? (screenWidth < 380 ? 0.62 : 0.72) 
+      ? (screenWidth < 360 ? 0.60 : (screenHeight > 780 ? 0.66 : 0.72)) 
       : 0.82; 
 
     return Column(
