@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/menu_item.dart';
 
 class CartItem {
@@ -29,10 +31,38 @@ class CartItem {
     double base = (d > 0) ? (d > p ? d : p) : p;
     return base + optionsExtraPrice;
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'item': item.toMap(),
+      'itemId': item.id,
+      'quantity': quantity,
+      'selectedChoices': selectedChoices.map((c) => c.toMap()).toList(),
+    };
+  }
+
+  factory CartItem.fromMap(Map<String, dynamic> map) {
+    return CartItem(
+      item: MenuItem.fromMap(map['item'] ?? {}, map['itemId'] ?? ''),
+      quantity: map['quantity'] ?? 1,
+      selectedChoices: (map['selectedChoices'] as List? ?? [])
+          .map((c) => OptionChoice.fromMap(Map<String, dynamic>.from(c)))
+          .toList(),
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory CartItem.fromJson(String source) => CartItem.fromMap(json.decode(source));
 }
 
 class CartProvider with ChangeNotifier {
+  static const String _cartPrefKey = 'shamiat_saved_cart_v1';
   final Map<String, CartItem> _items = {};
+
+  CartProvider() {
+    _loadCartFromPrefs();
+  }
 
   Map<String, CartItem> get items => {..._items};
 
@@ -60,6 +90,36 @@ class CartProvider with ChangeNotifier {
     return '${itemId}_${choiceKeys.join('_')}';
   }
 
+  void _saveCartToPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      Map<String, String> rawMap = {};
+      _items.forEach((key, cartItem) {
+        rawMap[key] = cartItem.toJson();
+      });
+      await prefs.setString(_cartPrefKey, json.encode(rawMap));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  void _loadCartFromPrefs() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final String? jsonString = prefs.getString(_cartPrefKey);
+      if (jsonString != null && jsonString.isNotEmpty) {
+        Map<String, dynamic> rawMap = json.decode(jsonString);
+        _items.clear();
+        rawMap.forEach((key, value) {
+          _items[key] = CartItem.fromJson(value);
+        });
+        notifyListeners();
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
   void addItem(MenuItem item, {List<OptionChoice> selectedChoices = const []}) {
     final String key = _generateCartKey(item.id, selectedChoices);
 
@@ -81,11 +141,13 @@ class CartProvider with ChangeNotifier {
         ),
       );
     }
+    _saveCartToPrefs();
     notifyListeners();
   }
 
   void removeItem(String key) {
     _items.remove(key);
+    _saveCartToPrefs();
     notifyListeners();
   }
 
@@ -96,6 +158,7 @@ class CartProvider with ChangeNotifier {
       } else {
         _items.remove(keyOrItemId);
       }
+      _saveCartToPrefs();
       notifyListeners();
       return;
     }
@@ -109,6 +172,7 @@ class CartProvider with ChangeNotifier {
       } else {
         _items.remove(keyToRemove);
       }
+      _saveCartToPrefs();
       notifyListeners();
     }
   }
@@ -125,6 +189,7 @@ class CartProvider with ChangeNotifier {
 
   void clearCart() {
     _items.clear();
+    _saveCartToPrefs();
     notifyListeners();
   }
 }

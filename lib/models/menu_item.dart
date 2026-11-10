@@ -97,7 +97,6 @@ class MenuItem {
   });
 
   factory MenuItem.fromMap(Map<String, dynamic> map, String docId) {
-    // Handling potential variation in field names from Dashboard
     String catId = map['category'] ?? map['categoryId'] ?? map['category_id'] ?? '';
     
     var rawOptions = map['options'] as List? ?? [];
@@ -145,6 +144,7 @@ class CarouselItem {
   final String titleEn;
   final String subTitleAr;
   final String subTitleEn;
+  final double? price;
   final String? actionUrl;
   final bool isActive;
   final int order;
@@ -156,6 +156,7 @@ class CarouselItem {
     required this.titleEn,
     required this.subTitleAr,
     required this.subTitleEn,
+    this.price,
     this.actionUrl,
     this.isActive = true,
     this.order = 0,
@@ -169,6 +170,7 @@ class CarouselItem {
       titleEn: map['titleEn'] ?? map['title_en'] ?? '',
       subTitleAr: map['subTitleAr'] ?? map['sub_title_ar'] ?? '',
       subTitleEn: map['subTitleEn'] ?? map['sub_title_en'] ?? '',
+      price: (map['price'] as num?)?.toDouble(),
       actionUrl: map['actionUrl'] ?? map['action_url'],
       isActive: map['isActive'] ?? map['is_active'] ?? true,
       order: map['order'] ?? 0,
@@ -182,6 +184,7 @@ class CarouselItem {
       'titleEn': titleEn,
       'subTitleAr': subTitleAr,
       'subTitleEn': subTitleEn,
+      'price': price,
       'actionUrl': actionUrl,
       'isActive': isActive,
       'order': order,

@@ -9,7 +9,7 @@ import 'providers/theme_provider.dart';
 import 'providers/menu_provider.dart';
 import 'providers/settings_provider.dart';
 import 'screens/home_screen.dart';
-import 'screens/cart_screen.dart';
+ import 'screens/cart_screen.dart';
 import 'screens/menu_screen.dart' deferred as menu;
 import 'screens/contact_screen.dart' deferred as contact; 
 import 'widgets/responsive_layout.dart';
@@ -253,27 +253,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
-  bool _isInit = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _loadPersistedIndex();
-  }
-
-  void _loadPersistedIndex() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (mounted) {
-      setState(() {
-        _currentIndex = prefs.getInt('current_tab_index') ?? 0;
-        _isInit = true;
-      });
-    }
-  }
-
-  void _saveIndex(int index) async {
-    final prefs = await SharedPreferences.getInstance();
-    prefs.setInt('current_tab_index', index);
+  void _onTabChanged(int index) {
     setState(() {
       _currentIndex = index;
     });
@@ -281,15 +262,8 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_isInit) {
-      return const Scaffold(
-        backgroundColor: Color(0xFF1B4332),
-        body: Center(child: CircularProgressIndicator(color: Color(0xFFBC8A5F))),
-      );
-    }
-
     final List<Widget> screens = [
-      HomeScreen(onViewMenu: () => _saveIndex(1)),
+      HomeScreen(onViewMenu: () => _onTabChanged(1)),
       DeferredWidget(loader: menu.loadLibrary, builder: () => menu.MenuScreen()),
       const CartScreen(),
       DeferredWidget(loader: contact.loadLibrary, builder: () => contact.ContactScreen()),
@@ -297,7 +271,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return ResponsiveLayout(
       currentIndex: _currentIndex,
-      onIndexChanged: _saveIndex,
+      onIndexChanged: _onTabChanged,
       body: PageTransitionSwitcher(
         currentIndex: _currentIndex,
         child: screens[_currentIndex],

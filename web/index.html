@@ -1,16 +1,66 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <base href="$FLUTTER_BASE_HREF">
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="مطعم شاميات - الذوق الشامي الأصيل">
-  <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" id="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 
+  <!-- Primary SEO Meta Tags -->
+  <title>مطعم شاميات - الذوق الشامي الأصيل | رأس الخيمة</title>
+  <meta name="title" content="مطعم شاميات - الذوق الشامي الأصيل | رأس الخيمة">
+  <meta name="description" content="مطعم شاميات في رأس الخيمة النخيل. أشهى المأكولات الشامية والشارورما، البرجر، الدجاج البروستد، والمقبلات. خدمة التوصيل السريع متوفرة عبر الموقع.">
+  <meta name="keywords" content="مطعم شاميات, شاميات راس الخيمة, شاورما شاميات, شاورما رأس الخيمة, مطاعم رأس الخيمة, أكل شامي, توصيل شاميات, النخيل رأس الخيمة">
+  <meta name="robots" content="index, follow, max-image-preview:large">
+  <meta name="author" content="مطعم شاميات">
+  <meta name="theme-color" content="#1B4332">
+
+  <!-- Open Graph / Facebook / WhatsApp Meta Tags -->
+  <meta property="og:type" content="restaurant">
+  <meta property="og:site_name" content="مطعم شاميات">
+  <meta property="og:title" content="مطعم شاميات - الذوق الشامي الأصيل في رأس الخيمة">
+  <meta property="og:description" content="أشهى المأكولات الشامية والشاورما والمشويات. اكتشف المنيو واطلب الآن أونلاين للتوصيل المباشر أو الاستلام من الفرع!">
+  <meta property="og:image" content="bg.webp">
+  <meta property="og:locale" content="ar_AE">
+
+  <!-- Twitter Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="مطعم شاميات - الذوق الشامي الأصيل">
+  <meta name="twitter:description" content="أشهى الشاورما والمأكولات الشامية في رأس الخيمة النخيل. طلبات توصيل واستلام سريعة.">
+  <meta name="twitter:image" content="bg.webp">
+
+  <!-- Structured Data / JSON-LD for Google Knowledge Graph & Local SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Restaurant",
+    "name": "مطعم شاميات",
+    "image": "bg.webp",
+    "description": "مطعم شاميات يقدم الذوق الشامي الأصيل في قلب رأس الخيمة: شاورما، برجر، دجاج، ومقبلات شاميّة فاخرة.",
+    "servesCuisine": ["Levantine", "Middle Eastern", "Syrian", "Shawarma"],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "شارع المنتصر - مقابل أبراج الدانة - النخيل",
+      "addressLocality": "رأس الخيمة",
+      "addressRegion": "رأس الخيمة",
+      "addressCountry": "AE"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": 25.792,
+      "longitude": 55.975
+    },
+    "telephone": "0522242919",
+    "priceRange": "AED",
+    "currenciesAccepted": "AED",
+    "paymentAccepted": "Cash, Card",
+    "url": "https://shamiat.web.app/"
+  }
+  </script>
+
+  <!-- Icons & Manifest -->
   <link rel="apple-touch-icon" href="bg.webp">
   <link rel="icon" type="image/webp" href="bg.webp"/>
-
-  <title>Shamiat - شاميات</title>
   <link rel="manifest" href="manifest.json">
 
   <style>
@@ -21,13 +71,13 @@
       background-color: #1B4332; transition: opacity 0.4s;
     }
     .logo {
-      width: 150px; height: 150px; border-radius: 50%;
+      width: 140px; height: 140px; border-radius: 50%;
       border: 3px solid #BC8A5F; box-shadow: 0 0 25px rgba(0,0,0,0.4);
       animation: pulse 2s infinite ease-in-out;
     }
     @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
     .loader {
-      margin-top: 30px; width: 40px; height: 40px;
+      margin-top: 25px; width: 38px; height: 38px;
       border: 3px solid rgba(188, 138, 95, 0.2); border-radius: 50%;
       border-top-color: #BC8A5F; animation: spin 1s linear infinite;
     }
@@ -39,7 +89,7 @@
     <img
       src="bg.webp"
       class="logo"
-      alt="Logo"
+      alt="مطعم شاميات"
       fetchpriority="high"
       loading="eager"
     >
@@ -51,27 +101,61 @@
     window.addEventListener('load', function(ev) {
       var loadingScreen = document.getElementById('loading-screen');
 
-      _flutter.loader.loadEntrypoint({
+      function hideLoader() {
+        if (loadingScreen && loadingScreen.parentNode) {
+          loadingScreen.style.opacity = '0';
+          setTimeout(function() {
+            if (loadingScreen && loadingScreen.parentNode) {
+              loadingScreen.remove();
+            }
+          }, 400);
+        }
+      }
+
+      // Safe fallback timer: Ensure loading screen NEVER stays stuck
+      setTimeout(hideLoader, 3500);
+
+      // Safe Cache & Service Worker Cleanup
+      try {
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (var r of registrations) {
+              r.unregister();
+            }
+          });
+        }
+      } catch(e) {}
+
+      var loadConfig = {
         serviceWorker: {
           serviceWorkerVersion: {{flutter_service_worker_version}},
         },
         onEntrypointLoaded: function(engineInitializer) {
-          // تعديل: نحدد الخيار التلقائي الأسرع للمتصفح
           engineInitializer.initializeEngine({
             useColorEmoji: true
           }).then(function(appRunner) {
             appRunner.runApp().then(function() {
-              if (loadingScreen) {
-                loadingScreen.style.opacity = '0';
-                setTimeout(function() { loadingScreen.remove(); }, 400);
-              }
+              hideLoader();
             });
+          }).catch(function() {
+            hideLoader();
           });
         }
-      });
+      };
+
+      if (window._flutter && window._flutter.loader) {
+        if (typeof window._flutter.loader.loadEntrypoint === 'function') {
+          window._flutter.loader.loadEntrypoint(loadConfig);
+        } else if (typeof window._flutter.loader.load === 'function') {
+          window._flutter.loader.load(loadConfig);
+        } else {
+          hideLoader();
+        }
+      } else {
+        hideLoader();
+      }
     });
 
-    // تحسين: تقليل تكرار السكربت من 1 ثانية إلى 3 ثوانٍ لتخفيف الضغط على المعالج
     setInterval(function() {
       var meta = document.querySelector('meta[name="viewport"]');
       if (meta && (meta.content.includes('user-scalable=no') || meta.content.includes('maximum-scale=1.0'))) {
